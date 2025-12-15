@@ -1,0 +1,392 @@
+# Plan Backend - nelo-api
+
+**FastAPI Monolithe Modulaire (M1-M5)**
+
+---
+
+## Vue d'Ensemble
+
+| Element | Detail |
+|---------|--------|
+| **Framework** | FastAPI |
+| **Base de donnees** | PostgreSQL + PostGIS |
+| **Cache** | Redis |
+| **ORM** | SQLAlchemy 2.0 |
+| **Migrations** | Alembic |
+
+---
+
+## M1: Infrastructure de Base (Semaines 1-2)
+
+### Objectif
+Mettre en place l'environnement de developpement et l'infrastructure de base.
+
+### 1.1 Structure du projet
+
+Creer la structure selon [02_ARCHITECTURE.md](../02_ARCHITECTURE.md):
+
+```
+services/
+└── nelo-api/
+    ├── app/
+    │   ├── modules/
+    │   │   ├── auth/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── router.py
+    │   │   │   ├── service.py
+    │   │   │   ├── schemas.py
+    │   │   │   └── dependencies.py
+    │   │   ├── users/
+    │   │   ├── orders/
+    │   │   ├── deliveries/
+    │   │   ├── payments/
+    │   │   └── notifications/
+    │   ├── core/
+    │   │   ├── config.py
+    │   │   ├── database.py
+    │   │   ├── security.py
+    │   │   └── exceptions.py
+    │   ├── shared/
+    │   │   ├── interfaces/
+    │   │   └── events/
+    │   └── main.py
+    ├── tests/
+    ├── alembic/
+    ├── pyproject.toml
+    └── Dockerfile
+```
+
+- [ ] Creer la structure de dossiers
+- [ ] Configurer `.gitignore`, `.editorconfig`, `.env.example`
+
+### 1.2 Initialisation FastAPI
+- [ ] Initialiser le projet avec `pyproject.toml`
+- [ ] Configurer SQLAlchemy + Alembic
+- [ ] Configurer Pydantic settings
+- [ ] Implementer le health check endpoint
+- [ ] Configurer CORS
+
+### 1.3 Base de donnees
+- [ ] Deployer PostgreSQL avec PostGIS
+- [ ] Creer les schemas (auth, users, orders, deliveries, payments, notifications)
+- [ ] Executer `databases/monolith/schema.sql`
+- [ ] Configurer Alembic pour les migrations
+- [ ] Creer les seeds pour Tiassale (villes, zones)
+
+### 1.4 Cache et Sessions
+- [ ] Deployer Redis
+- [ ] Configurer le client Redis async
+- [ ] Implementer le gestionnaire de sessions
+
+### 1.5 Docker
+- [ ] Creer `Dockerfile` pour nelo-api
+- [ ] Creer `docker-compose.yml` (api, postgres, redis)
+- [ ] Creer `docker-compose.dev.yml` avec hot-reload
+- [ ] Documenter le setup
+
+### Livrables M1
+- [ ] Environnement Docker fonctionnel
+- [ ] API accessible sur `http://localhost:8000`
+- [ ] Documentation Swagger sur `/docs`
+- [ ] Base de donnees initialisee
+
+---
+
+## M2: Authentification & Utilisateurs (Semaines 3-4)
+
+### Objectif
+Implementer le systeme d'authentification et la gestion des utilisateurs.
+
+### 2.1 Module Auth
+
+**Endpoints:**
+```
+POST /api/v1/auth/register       # Inscription par telephone
+POST /api/v1/auth/login          # Connexion
+POST /api/v1/auth/send-otp       # Envoi OTP
+POST /api/v1/auth/verify-otp     # Verification OTP
+POST /api/v1/auth/refresh        # Refresh token
+POST /api/v1/auth/logout         # Deconnexion
+```
+
+**Taches:**
+- [ ] Service OTP
+  - Generation code 6 chiffres
+  - Stockage Redis (TTL 5 min)
+  - Limite 3 tentatives
+  - Integration SMS (Orange CI / Twilio)
+- [ ] Service JWT
+  - Access token (15 min)
+  - Refresh token (7 jours)
+  - Blacklist tokens (Redis)
+- [ ] Middleware d'authentification
+- [ ] Hashage mots de passe (Argon2)
+- [ ] Protection PIN (hash + rate limiting)
+
+### 2.2 Module Users
+
+**Endpoints:**
+```
+GET    /api/v1/users/me              # Profil courant
+PUT    /api/v1/users/me              # Modifier profil
+GET    /api/v1/users/me/addresses    # Lister adresses
+POST   /api/v1/users/me/addresses    # Ajouter adresse
+PUT    /api/v1/users/me/addresses/:id
+DELETE /api/v1/users/me/addresses/:id
+```
+
+**Taches:**
+- [ ] Gestion des roles (client, provider, driver, admin)
+- [ ] Upload avatar (vers MinIO/R2)
+- [ ] Systeme de parrainage (referral_code)
+
+### 2.3 KYC de base
+- [ ] Endpoint upload documents
+- [ ] Stockage securise des documents
+- [ ] Workflow de verification (manuel en MVP)
+
+### Livrables M2
+- [ ] Authentification complete par OTP
+- [ ] Gestion des profils utilisateurs
+- [ ] Tests unitaires et d'integration
+- [ ] Documentation API (OpenAPI)
+
+---
+
+## M3: Catalogue Prestataires & Produits (Semaines 5-6)
+
+### Objectif
+Implementer la gestion des prestataires, menus et produits.
+
+### 3.1 Gestion des Prestataires
+
+**Endpoints:**
+```
+GET  /api/v1/providers           # Liste avec filtres
+GET  /api/v1/providers/nearby    # A proximite (geoloc)
+GET  /api/v1/providers/:id       # Detail
+GET  /api/v1/providers/:id/menu  # Menu complet
+POST /api/v1/providers           # Creer (admin/provider)
+PUT  /api/v1/providers/:id       # Modifier
+```
+
+**Taches:**
+- [ ] Types de prestataires (Restaurant, Depot gaz, Epicerie)
+- [ ] Recherche geospatiale (PostGIS)
+  - Providers dans un rayon
+  - Tri par distance
+- [ ] Systeme d'horaires (schedules)
+- [ ] Calcul `is_open` en temps reel
+
+### 3.2 Gestion des Produits
+- [ ] CRUD produits standards
+- [ ] CRUD produits gaz (gas_products)
+- [ ] Categories de produits
+- [ ] Options et variations
+- [ ] Gestion des prix
+- [ ] Disponibilite (stock)
+
+### 3.3 Cache et Performance
+- [ ] Cache Redis pour les menus (5 min TTL)
+- [ ] Cache des providers proches
+- [ ] Pagination et infinite scroll
+
+### Livrables M3
+- [ ] API catalogue complete
+- [ ] Recherche geolocalisee
+- [ ] Tests de performance (< 200ms latence)
+
+---
+
+## M4: Systeme de Commandes (Semaines 7-9)
+
+### Objectif
+Implementer le flux complet de commande.
+
+### 4.1 Creation de Commandes
+
+**Endpoints:**
+```
+POST /api/v1/orders              # Creer commande
+GET  /api/v1/orders              # Mes commandes
+GET  /api/v1/orders/:id          # Detail
+PUT  /api/v1/orders/:id/cancel   # Annuler
+GET  /api/v1/orders/:id/tracking # Suivi
+```
+
+**Taches:**
+- [ ] Validation du panier
+  - Verification disponibilite produits
+  - Calcul des prix
+  - Application des promotions
+- [ ] Snapshot de l'adresse de livraison (JSONB)
+- [ ] Generation reference unique (ORD-XXXXXXXX)
+
+### 4.2 Machine d'Etats (Order Status)
+
+```
+pending -> confirmed -> preparing -> ready -> picked_up -> delivering -> delivered
+    |          |            |          |           |             |
+cancelled  cancelled   cancelled  cancelled   cancelled       failed
+```
+
+- [ ] Implementer les transitions d'etat
+- [ ] Historique des changements (order_status_history)
+- [ ] Validation des transitions
+- [ ] Notifications a chaque changement
+
+### 4.3 Module Livraisons
+
+**Endpoints:**
+```
+POST /api/v1/drivers/register      # Inscription livreur
+PUT  /api/v1/drivers/me/status     # Online/Offline
+PUT  /api/v1/drivers/me/location   # MAJ position
+GET  /api/v1/drivers/offers        # Courses disponibles
+POST /api/v1/drivers/offers/:id/accept
+POST /api/v1/drivers/offers/:id/reject
+```
+
+**Algorithme de matching:**
+```python
+score = (
+    0.30 * proximite_score +
+    0.25 * disponibilite_score +
+    0.20 * note_score +
+    0.15 * vehicule_score +
+    0.10 * historique_score
+)
+```
+
+- [ ] Systeme d'offres (delivery_offers)
+- [ ] Acceptation/Refus des courses
+- [ ] Tracking GPS en temps reel
+
+### 4.4 Bus d'Evenements Interne
+
+- [ ] Implementer EventBus (in-process)
+- [ ] Evenements:
+  - `order.created`
+  - `order.confirmed`
+  - `order.ready`
+  - `delivery.assigned`
+  - `delivery.picked_up`
+  - `delivery.completed`
+- [ ] Handlers de notifications
+
+### Livrables M4
+- [ ] Flux de commande complet
+- [ ] Matching livreurs fonctionnel
+- [ ] Suivi en temps reel (polling)
+
+---
+
+## M5: Systeme de Paiements (Semaines 10-11)
+
+### Objectif
+Implementer le portefeuille et les paiements.
+
+### 5.1 Portefeuille NELO
+
+**Endpoints:**
+```
+GET  /api/v1/wallet              # Solde
+GET  /api/v1/wallet/transactions # Historique
+POST /api/v1/wallet/topup        # Recharger
+POST /api/v1/wallet/transfer     # Transfert P2P
+```
+
+**Taches:**
+- [ ] Verification PIN pour transactions
+- [ ] Limites journalieres/mensuelles
+- [ ] Gel de compte si suspect
+
+### 5.2 Integration Paiements
+
+- [ ] Provider Wave (Mobile Money)
+  - Initiation paiement
+  - Webhook callback
+  - Verification statut
+- [ ] Provider CinetPay (backup)
+- [ ] Paiement cash a la livraison
+  - Collecte par livreur
+  - Reconciliation
+
+### 5.3 Transactions
+
+**Types:**
+- `topup` - recharge
+- `payment` - paiement commande
+- `refund` - remboursement
+- `transfer` - transfert
+- `commission` - prelevement
+
+**Commissions:**
+- Prestataires: 15% par defaut
+- Livreurs: 10% par defaut
+
+- [ ] Audit trail complet
+
+### 5.4 Payouts (Versements)
+- [ ] Calcul gains prestataires
+- [ ] Calcul gains livreurs
+- [ ] Export pour paiement manuel (MVP)
+
+### Livrables M5
+- [ ] Portefeuille fonctionnel
+- [ ] Integration Wave
+- [ ] Systeme de commissions
+
+---
+
+## Stack Technique
+
+```toml
+[project]
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+    "redis>=5.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[argon2]>=1.7.4",
+    "httpx>=0.26.0",
+    "geoalchemy2>=0.14.0",
+    "shapely>=2.0.0",
+    "python-multipart>=0.0.6",
+    "pillow>=10.2.0",
+    "boto3>=1.34.0",
+]
+```
+
+---
+
+## Tests
+
+```bash
+# Lancer tous les tests
+pytest
+
+# Tests avec couverture
+pytest --cov=app --cov-report=html
+
+# Tests d'un module specifique
+pytest tests/test_auth.py -v
+```
+
+---
+
+## Dependances Frontend
+
+Les apps frontend peuvent commencer leur developpement:
+
+| App | A partir de | Endpoints disponibles |
+|-----|-------------|----------------------|
+| App Client | M2 | Auth, Users |
+| App Provider | M3 | + Providers, Products |
+| App Driver | M4 | + Orders, Deliveries |
+| Web Admin | M2 | Tous au fur et a mesure |
