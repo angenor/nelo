@@ -1,0 +1,92 @@
+services:
+  nelo-api:
+    build:
+      context: ./services/nelo-api
+      dockerfile: Dockerfile.dev
+    container_name: nelo-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://nelo:nelo_dev_password@postgres:5432/nelo
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - DATABASE_ECHO=true
+    volumes:
+      - ./services/nelo-api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nelo-network-dev
+
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: nelo-postgres-dev
+    environment:
+      - POSTGRES_USER=nelo
+      - POSTGRES_PASSWORD=nelo_dev_password
+      - POSTGRES_DB=nelo
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./databases/monolith/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - nelo-network-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nelo -d nelo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: nelo-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - nelo-network-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: pgAdmin for database management
+  # Uncomment to enable (requires additional image pull)
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: nelo-pgadmin-dev
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@nelo.app
+  #     - PGADMIN_DEFAULT_PASSWORD=admin
+  #     - PGADMIN_CONFIG_SERVER_MODE=False
+  #   ports:
+  #     - "5050:80"
+  #   networks:
+  #     - nelo-network-dev
+  #   depends_on:
+  #     - postgres
+
+  # Optional: RedisInsight for Redis management
+  # Uncomment to enable (requires additional image pull)
+  # redisinsight:
+  #   image: redis/redisinsight:latest
+  #   container_name: nelo-redisinsight-dev
+  #   ports:
+  #     - "5540:5540"
+  #   networks:
+  #     - nelo-network-dev
+  #   depends_on:
+  #     - redis
+
+networks:
+  nelo-network-dev:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:

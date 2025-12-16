@@ -56,39 +56,39 @@ services/
     └── Dockerfile
 ```
 
-- [ ] Creer la structure de dossiers
-- [ ] Configurer `.gitignore`, `.editorconfig`, `.env.example`
+- [x] Creer la structure de dossiers
+- [x] Configurer `.gitignore`, `.editorconfig`, `.env.example`
 
 ### 1.2 Initialisation FastAPI
-- [ ] Initialiser le projet avec `pyproject.toml`
-- [ ] Configurer SQLAlchemy + Alembic
-- [ ] Configurer Pydantic settings
-- [ ] Implementer le health check endpoint
-- [ ] Configurer CORS
+- [x] Initialiser le projet avec `pyproject.toml`
+- [x] Configurer SQLAlchemy + Alembic
+- [x] Configurer Pydantic settings
+- [x] Implementer le health check endpoint
+- [x] Configurer CORS
 
 ### 1.3 Base de donnees
-- [ ] Deployer PostgreSQL avec PostGIS
-- [ ] Creer les schemas (auth, users, orders, deliveries, payments, notifications)
-- [ ] Executer `databases/monolith/schema.sql`
-- [ ] Configurer Alembic pour les migrations
+- [x] Deployer PostgreSQL avec PostGIS
+- [x] Creer les schemas (auth, users, orders, deliveries, payments, notifications)
+- [x] Executer `databases/monolith/schema.sql`
+- [x] Configurer Alembic pour les migrations
 - [ ] Creer les seeds pour Tiassale (villes, zones)
 
 ### 1.4 Cache et Sessions
-- [ ] Deployer Redis
-- [ ] Configurer le client Redis async
+- [x] Deployer Redis
+- [x] Configurer le client Redis async
 - [ ] Implementer le gestionnaire de sessions
 
 ### 1.5 Docker
-- [ ] Creer `Dockerfile` pour nelo-api
-- [ ] Creer `docker-compose.yml` (api, postgres, redis)
-- [ ] Creer `docker-compose.dev.yml` avec hot-reload
-- [ ] Documenter le setup
+- [x] Creer `Dockerfile` pour nelo-api
+- [x] Creer `docker-compose.yml` (api, postgres, redis)
+- [x] Creer `docker-compose.dev.yml` avec hot-reload
+- [x] Documenter le setup
 
 ### Livrables M1
-- [ ] Environnement Docker fonctionnel
-- [ ] API accessible sur `http://localhost:8000`
-- [ ] Documentation Swagger sur `/docs`
-- [ ] Base de donnees initialisee
+- [x] Environnement Docker fonctionnel
+- [x] API accessible sur `http://localhost:8000`
+- [x] Documentation Swagger sur `/docs`
+- [x] Base de donnees initialisee
 
 ---
 
@@ -264,7 +264,7 @@ score = (
 
 ### 4.4 Bus d'Evenements Interne
 
-- [ ] Implementer EventBus (in-process)
+- [x] Implementer EventBus (in-process) *(fait en M1)*
 - [ ] Evenements:
   - `order.created`
   - `order.confirmed`

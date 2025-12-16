@@ -1,0 +1,73 @@
+services:
+  nelo-api:
+    build:
+      context: ./services/nelo-api
+      dockerfile: Dockerfile
+    container_name: nelo-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://nelo:${DB_PASSWORD}@postgres:5432/nelo
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nelo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: nelo-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=nelo
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=nelo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./databases/monolith/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - nelo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nelo -d nelo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nelo-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - nelo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  nelo-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
