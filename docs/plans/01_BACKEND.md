@@ -110,18 +110,18 @@ POST /api/v1/auth/logout         # Deconnexion
 ```
 
 **Taches:**
-- [ ] Service OTP
-  - Generation code 6 chiffres
-  - Stockage Redis (TTL 5 min)
-  - Limite 3 tentatives
-  - Integration SMS (Orange CI / Twilio)
-- [ ] Service JWT
-  - Access token (15 min)
-  - Refresh token (7 jours)
-  - Blacklist tokens (Redis)
-- [ ] Middleware d'authentification
-- [ ] Hashage mots de passe (Argon2)
-- [ ] Protection PIN (hash + rate limiting)
+- [x] Service OTP
+  - [x] Generation code 6 chiffres
+  - [x] Stockage Redis (TTL 5 min)
+  - [x] Limite 3 tentatives
+  - [ ] Integration SMS (Orange CI / Twilio) - stub cree, a integrer
+- [x] Service JWT
+  - [x] Access token (15 min)
+  - [x] Refresh token (7 jours)
+  - [x] Blacklist tokens (Redis)
+- [x] Middleware d'authentification
+- [x] Hashage mots de passe (Argon2)
+- [x] Protection PIN (hash + rate limiting)
 
 ### 2.2 Module Users
 
@@ -136,9 +136,9 @@ DELETE /api/v1/users/me/addresses/:id
 ```
 
 **Taches:**
-- [ ] Gestion des roles (client, provider, driver, admin)
-- [ ] Upload avatar (vers MinIO/R2)
-- [ ] Systeme de parrainage (referral_code)
+- [x] Gestion des roles (client, provider, driver, admin)
+- [ ] Upload avatar (vers MinIO/R2) - a implementer avec stockage
+- [x] Systeme de parrainage (referral_code) - generation code auto
 
 ### 2.3 KYC de base
 - [ ] Endpoint upload documents
@@ -146,10 +146,10 @@ DELETE /api/v1/users/me/addresses/:id
 - [ ] Workflow de verification (manuel en MVP)
 
 ### Livrables M2
-- [ ] Authentification complete par OTP
-- [ ] Gestion des profils utilisateurs
+- [x] Authentification complete par OTP
+- [x] Gestion des profils utilisateurs
 - [ ] Tests unitaires et d'integration
-- [ ] Documentation API (OpenAPI)
+- [x] Documentation API (OpenAPI) - auto-generee par FastAPI
 
 ---
 
