@@ -85,11 +85,11 @@ apps/mobile-client/
 ### Phase 1: Setup + Auth (avec Backend M2)
 
 #### 1.1 Setup Projet
-- [ ] Creer le projet Flutter
-- [ ] Configurer la structure Clean Architecture
-- [ ] Configurer l'injection de dependances (get_it + injectable)
-- [ ] Configurer le theme (couleurs, typographie)
-- [ ] Creer les widgets de base (boutons, inputs, cards)
+- [x] Creer le projet Flutter
+- [x] Configurer la structure Clean Architecture
+- [x] Configurer l'injection de dependances (get_it + injectable)
+- [x] Configurer le theme (couleurs, typographie)
+- [x] Creer les widgets de base (boutons, inputs, cards)
 
 #### 1.2 Splash Screen
 - [ ] Logo anime
