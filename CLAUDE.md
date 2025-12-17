@@ -142,6 +142,18 @@ await EventBus.publish(Event(
 ))
 ```
 
+## Development Guidelines
+
+### Schema-First Development
+**IMPORTANT:** Before implementing any form or screen that collects/displays user data:
+1. **Always read `databases/monolith/schema.sql`** to understand the exact fields required
+2. Match form fields to database columns (required vs optional, types, constraints)
+3. Key tables to check:
+   - `auth.users` - authentication fields (phone, email, role, kyc_level)
+   - `users.profiles` - user info (first_name, last_name, referral_code, referred_by_id)
+   - `orders.*` - order-related entities
+   - `payments.wallets` - wallet/payment fields
+
 ## Context-Specific Considerations
 
 - **African Market:** Consider offline capabilities, diverse payment methods (Mobile Money via Wave, cash on delivery)

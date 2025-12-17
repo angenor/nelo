@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../presentation/screens/auth/login_screen.dart';
+import '../presentation/screens/auth/otp_verification_screen.dart';
+import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 
@@ -55,19 +58,25 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Login'),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
         name: 'register',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Register'),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.verifyOtp,
         name: 'verifyOtp',
         builder: (context, state) {
           final phone = state.uri.queryParameters['phone'] ?? '';
-          return _PlaceholderScreen(title: 'Verify OTP: $phone');
+          final mode = state.uri.queryParameters['mode'] ?? 'login';
+          final referralCode = state.uri.queryParameters['referral_code'];
+          return OtpVerificationScreen(
+            phone: phone,
+            mode: mode,
+            referralCode: referralCode,
+          );
         },
       ),
 

@@ -102,11 +102,11 @@ apps/mobile-client/
 - [x] Stockage local du premier lancement
 
 #### 1.4 Authentification
-- [ ] Ecran de connexion (telephone)
-- [ ] Ecran d'inscription
-- [ ] Ecran de verification OTP
-- [ ] Gestion des tokens (stockage securise)
-- [ ] Auto-refresh des tokens
+- [x] Ecran de connexion (telephone)
+- [x] Ecran d'inscription
+- [x] Ecran de verification OTP
+- [x] Gestion des tokens (stockage securise)
+- [x] Auto-refresh des tokens
 
 ### Phase 2: Home + Catalogue (avec Backend M3)
 
