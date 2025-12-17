@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../presentation/screens/onboarding/onboarding_screen.dart';
+import '../presentation/screens/splash/splash_screen.dart';
 
 /// Route names
 class AppRoutes {
@@ -39,14 +41,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.splash,
         name: 'splash',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Splash'),
+        builder: (context, state) => const SplashScreen(),
       ),
 
       // Onboarding
       GoRoute(
         path: AppRoutes.onboarding,
         name: 'onboarding',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Onboarding'),
+        builder: (context, state) => const OnboardingScreen(),
       ),
 
       // Auth routes

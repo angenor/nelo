@@ -92,14 +92,14 @@ apps/mobile-client/
 - [x] Creer les widgets de base (boutons, inputs, cards)
 
 #### 1.2 Splash Screen
-- [ ] Logo anime
-- [ ] Verification de l'authentification
-- [ ] Redirection appropriee
+- [x] Logo anime
+- [x] Verification de l'authentification
+- [x] Redirection appropriee
 
 #### 1.3 Onboarding
-- [ ] 3-4 slides de presentation
-- [ ] Bouton "Commencer"
-- [ ] Stockage local du premier lancement
+- [x] 3-4 slides de presentation
+- [x] Bouton "Commencer"
+- [x] Stockage local du premier lancement
 
 #### 1.4 Authentification
 - [ ] Ecran de connexion (telephone)

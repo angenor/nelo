@@ -15,6 +15,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../data/datasources/local/auth_local_datasource.dart';
 import 'register_module.dart';
 
 extension GetItInjectableX on GetIt {
@@ -28,6 +29,11 @@ extension GetItInjectableX on GetIt {
     final registerModule = _$RegisterModule();
     gh.lazySingleton<Dio>(() => registerModule.dio);
     gh.lazySingleton<FlutterSecureStorage>(() => registerModule.secureStorage);
+
+    // Data sources
+    gh.lazySingleton<AuthLocalDataSource>(
+      () => AuthLocalDataSource(gh<FlutterSecureStorage>()),
+    );
 
     return this;
   }
