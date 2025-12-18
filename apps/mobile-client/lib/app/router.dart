@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/otp_verification_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/home/home_screen.dart';
+import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 
@@ -26,6 +28,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String addresses = '/addresses';
   static const String wallet = '/wallet';
+  static const String notifications = '/notifications';
 }
 
 /// Application router configuration
@@ -33,6 +36,7 @@ class AppRouter {
   AppRouter._();
 
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
   /// GoRouter instance
   static final GoRouter router = GoRouter(
@@ -80,70 +84,124 @@ class AppRouter {
         },
       ),
 
-      // Main app routes
-      GoRoute(
-        path: AppRoutes.home,
-        name: 'home',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Home'),
+      // Main app with bottom navigation
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: [
+          // Home tab
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                name: 'home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          // Search tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.search,
+                name: 'search',
+                builder: (context, state) =>
+                    const _PlaceholderScreen(title: 'Recherche'),
+              ),
+            ],
+          ),
+          // Orders tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.orders,
+                name: 'orders',
+                builder: (context, state) =>
+                    const _PlaceholderScreen(title: 'Mes commandes'),
+              ),
+            ],
+          ),
+          // Wallet tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.wallet,
+                name: 'wallet',
+                builder: (context, state) =>
+                    const _PlaceholderScreen(title: 'Portefeuille'),
+              ),
+            ],
+          ),
+          // Profile tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                name: 'profile',
+                builder: (context, state) =>
+                    const _PlaceholderScreen(title: 'Mon profil'),
+              ),
+            ],
+          ),
+        ],
       ),
-      GoRoute(
-        path: AppRoutes.search,
-        name: 'search',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Search'),
-      ),
+
+      // Detail routes (outside bottom navigation)
       GoRoute(
         path: AppRoutes.providerDetail,
         name: 'providerDetail',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return _PlaceholderScreen(title: 'Provider: $id');
+          return _PlaceholderScreen(title: 'Prestataire: $id');
         },
       ),
       GoRoute(
         path: AppRoutes.productDetail,
         name: 'productDetail',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return _PlaceholderScreen(title: 'Product: $id');
+          return _PlaceholderScreen(title: 'Produit: $id');
         },
       ),
       GoRoute(
         path: AppRoutes.cart,
         name: 'cart',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Cart'),
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const _PlaceholderScreen(title: 'Panier'),
       ),
       GoRoute(
         path: AppRoutes.checkout,
         name: 'checkout',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Checkout'),
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Paiement'),
       ),
       GoRoute(
         path: AppRoutes.orderTracking,
         name: 'orderTracking',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return _PlaceholderScreen(title: 'Order Tracking: $id');
+          return _PlaceholderScreen(title: 'Suivi commande: $id');
         },
-      ),
-      GoRoute(
-        path: AppRoutes.orders,
-        name: 'orders',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Orders'),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        name: 'profile',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Profile'),
       ),
       GoRoute(
         path: AppRoutes.addresses,
         name: 'addresses',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Addresses'),
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Mes adresses'),
       ),
       GoRoute(
-        path: AppRoutes.wallet,
-        name: 'wallet',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Wallet'),
+        path: AppRoutes.notifications,
+        name: 'notifications',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Notifications'),
       ),
     ],
     errorBuilder: (context, state) => _ErrorScreen(error: state.error),
@@ -172,7 +230,7 @@ class _PlaceholderScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Screen en cours de développement',
+              'Écran en cours de développement',
               style: TextStyle(color: Colors.grey),
             ),
           ],

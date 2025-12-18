@@ -111,13 +111,13 @@ apps/mobile-client/
 ### Phase 2: Home + Catalogue (avec Backend M3)
 
 #### 2.1 Home Screen
-- [ ] Header avec localisation actuelle
-- [ ] Barre de recherche
-- [ ] Categories de services (icones)
-- [ ] Section promotions (carousel)
-- [ ] Section "Restaurants populaires"
-- [ ] Section "Pres de vous"
-- [ ] Bottom navigation bar
+- [x] Header avec localisation actuelle
+- [x] Barre de recherche
+- [x] Categories de services (icones)
+- [x] Section promotions (carousel)
+- [x] Section "Restaurants populaires"
+- [x] Section "Pres de vous"
+- [x] Bottom navigation bar
 
 #### 2.2 Recherche
 - [ ] Barre de recherche avec suggestions

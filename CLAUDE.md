@@ -154,6 +154,28 @@ await EventBus.publish(Event(
    - `orders.*` - order-related entities
    - `payments.wallets` - wallet/payment fields
 
+## Placeholder Images & Avatars
+
+For development and mockups, use these placeholder services:
+
+### Random Images (Picsum Photos)
+```
+https://picsum.photos/seed/{seed}/{width}/{height}
+```
+**Examples:**
+- `https://picsum.photos/seed/restaurant1/400/200` - Seeded 400x200 image (consistent)
+- `https://picsum.photos/seed/promo/600/300` - Seeded 600x300 image
+- `https://picsum.photos/800/600` - Random 800x600 image (no seed)
+
+### Random Avatars (Pravatar)
+```
+https://i.pravatar.cc/{size}
+```
+**Examples:**
+- `https://i.pravatar.cc/150` - 150x150 avatar
+- `https://i.pravatar.cc/64` - 64x64 avatar (small)
+- `https://i.pravatar.cc/300` - 300x300 avatar (large)
+
 ## Context-Specific Considerations
 
 - **African Market:** Consider offline capabilities, diverse payment methods (Mobile Money via Wave, cash on delivery)
