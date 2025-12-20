@@ -107,15 +107,15 @@ class _CategoryItem extends StatelessWidget {
       case ProviderType.restaurant:
         return AppColors.primary;
       case ProviderType.gasDepot:
-        return Colors.orange;
+        return AppColors.warning;
       case ProviderType.grocery:
-        return Colors.green;
+        return AppColors.success;
       case ProviderType.pharmacy:
-        return Colors.blue;
+        return AppColors.info;
       case ProviderType.pressing:
-        return Colors.purple;
+        return AppColors.secondary;
       case ProviderType.artisan:
-        return Colors.brown;
+        return AppColors.primaryDark;
     }
   }
 }

@@ -17,10 +17,10 @@ class MainShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppColors.shadow,
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),

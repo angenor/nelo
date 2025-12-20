@@ -145,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8,
       decoration: BoxDecoration(
         color: isActive ? AppColors.primary : AppColors.grey300,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: AppSpacing.borderRadiusXs,
       ),
     );
   }

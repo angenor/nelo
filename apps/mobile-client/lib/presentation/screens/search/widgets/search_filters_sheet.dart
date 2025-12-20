@@ -30,7 +30,7 @@ class _SearchFiltersSheetState extends State<SearchFiltersSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
         ),
@@ -50,7 +50,7 @@ class _SearchFiltersSheetState extends State<SearchFiltersSheet> {
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.grey300,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppSpacing.borderRadiusXxs,
                 ),
               ),
 
@@ -229,10 +229,10 @@ class _SearchFiltersSheetState extends State<SearchFiltersSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: AppColors.shadow,
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -245,8 +245,8 @@ class _SearchFiltersSheetState extends State<SearchFiltersSheet> {
                       onPressed: () => widget.onApply(_filter),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: AppColors.textOnPrimary,
+                        padding: AppSpacing.verticalMd,
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusMd),
@@ -255,7 +255,7 @@ class _SearchFiltersSheetState extends State<SearchFiltersSheet> {
                       child: Text(
                         'Appliquer les filtres',
                         style: AppTypography.labelLarge.copyWith(
-                          color: Colors.white,
+                          color: AppColors.textOnPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

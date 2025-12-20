@@ -144,6 +144,36 @@ await EventBus.publish(Event(
 
 ## Development Guidelines
 
+### Centralized Theme System (Flutter)
+**IMPORTANT:** All Flutter widgets MUST use centralized theme constants from `lib/core/theme/`:
+
+| File | Usage |
+|------|-------|
+| `app_colors.dart` | All colors (`AppColors.primary`, `AppColors.surface`, etc.) |
+| `app_typography.dart` | All text styles (`AppTypography.headlineMedium`, etc.) |
+| `app_spacing.dart` | All spacing/padding/radius (`AppSpacing.md`, `AppSpacing.radiusMd`, etc.) |
+| `app_theme.dart` | Complete Material theme |
+
+**Never use:**
+- `Colors.white` → use `AppColors.surface` or `AppColors.white`
+- `Colors.black.withOpacity()` → use `AppColors.shadow` or `AppColors.overlay`
+- `Colors.amber` (for stars) → use `AppColors.rating`
+- `Colors.green/red` (status) → use `AppColors.success/error`
+- `BorderRadius.circular(4)` → use `AppSpacing.borderRadiusXs`
+- Hardcoded font sizes → use `AppTypography.*`
+
+**Key color constants:**
+```dart
+AppColors.primary      // Brand color
+AppColors.surface      // Card/container backgrounds
+AppColors.shadow       // Box shadows
+AppColors.rating       // Star ratings (amber)
+AppColors.success      // Open status, success states
+AppColors.error        // Closed status, errors
+AppColors.overlay      // Dark overlays (60% black)
+AppColors.textOnPrimary // Text on primary color backgrounds
+```
+
 ### Schema-First Development
 **IMPORTANT:** Before implementing any form or screen that collects/displays user data:
 1. **Always read `databases/monolith/schema.sql`** to understand the exact fields required

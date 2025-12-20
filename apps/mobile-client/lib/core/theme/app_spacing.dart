@@ -44,6 +44,7 @@ class AppSpacing {
   );
 
   // Border radius
+  static const double radiusXxs = 2.0;
   static const double radiusXs = 4.0;
   static const double radiusSm = 8.0;
   static const double radiusMd = 12.0;
@@ -52,6 +53,7 @@ class AppSpacing {
   static const double radiusFull = 9999.0;
 
   // Border radius presets
+  static const BorderRadius borderRadiusXxs = BorderRadius.all(Radius.circular(radiusXxs));
   static const BorderRadius borderRadiusXs = BorderRadius.all(Radius.circular(radiusXs));
   static const BorderRadius borderRadiusSm = BorderRadius.all(Radius.circular(radiusSm));
   static const BorderRadius borderRadiusMd = BorderRadius.all(Radius.circular(radiusMd));

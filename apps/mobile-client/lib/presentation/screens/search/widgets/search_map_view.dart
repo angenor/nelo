@@ -148,7 +148,7 @@ class _SearchMapViewState extends State<SearchMapView> {
                 CameraUpdate.newLatLngZoom(_tiassaleCenter, 14),
               );
             },
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.surface,
             child: const Icon(
               Icons.my_location,
               color: AppColors.primary,
@@ -208,11 +208,11 @@ class _SelectedProviderCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
+                color: AppColors.shadow,
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -259,7 +259,7 @@ class _SelectedProviderCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        const Icon(Icons.star, color: AppColors.rating, size: 16),
                         const SizedBox(width: 2),
                         Text(
                           provider.ratingText,
@@ -283,7 +283,7 @@ class _SelectedProviderCard extends StatelessWidget {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: provider.isOpen ? Colors.green : Colors.red,
+                            color: provider.isOpen ? AppColors.success : AppColors.error,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -291,7 +291,7 @@ class _SelectedProviderCard extends StatelessWidget {
                         Text(
                           provider.isOpen ? 'Ouvert' : 'Ferme',
                           style: AppTypography.labelSmall.copyWith(
-                            color: provider.isOpen ? Colors.green : Colors.red,
+                            color: provider.isOpen ? AppColors.success : AppColors.error,
                           ),
                         ),
                       ],
@@ -350,13 +350,13 @@ class _ProvidersBottomSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppSpacing.radiusLg),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: AppColors.shadow,
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -371,7 +371,7 @@ class _ProvidersBottomSheet extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.grey300,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppSpacing.borderRadiusXxs,
                 ),
               ),
               Padding(
@@ -425,7 +425,7 @@ class _MapProviderTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(color: AppColors.grey200),
         ),
@@ -461,7 +461,7 @@ class _MapProviderTile extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: AppColors.rating, size: 14),
                       const SizedBox(width: 2),
                       Text(
                         provider.ratingText,
@@ -492,7 +492,7 @@ class _MapProviderTile extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: provider.isOpen ? Colors.green : Colors.red,
+                color: provider.isOpen ? AppColors.success : AppColors.error,
                 shape: BoxShape.circle,
               ),
             ),

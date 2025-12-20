@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF8B1538), // Bordeaux from logo
+      backgroundColor: AppColors.splashBackground,
       body: Center(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -118,12 +118,14 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: AppSpacing.xl),
               // Loading indicator
-              const SizedBox(
+              SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.white.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
             ],

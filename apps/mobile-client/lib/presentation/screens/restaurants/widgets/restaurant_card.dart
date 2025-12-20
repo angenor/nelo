@@ -49,11 +49,11 @@ class RestaurantCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(AppSpacing.xs),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
+                          color: AppColors.shadow,
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -61,7 +61,7 @@ class RestaurantCard extends StatelessWidget {
                     ),
                     child: Icon(
                       isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : AppColors.textSecondary,
+                      color: isFavorite ? AppColors.error : AppColors.textSecondary,
                       size: 20,
                     ),
                   ),
@@ -90,7 +90,7 @@ class RestaurantCard extends StatelessWidget {
               // Rating with star
               const Icon(
                 Icons.star,
-                color: Colors.amber,
+                color: AppColors.rating,
                 size: 16,
               ),
               const SizedBox(width: 4),

@@ -71,7 +71,7 @@ class _PromotionsCarouselState extends State<PromotionsCarousel> {
       height: 8,
       decoration: BoxDecoration(
         color: _currentPage == index ? AppColors.primary : AppColors.grey300,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: AppSpacing.borderRadiusXs,
       ),
     );
   }
@@ -96,7 +96,7 @@ class _PromotionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppColors.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -119,7 +119,7 @@ class _PromotionCard extends StatelessWidget {
                     color: AppColors.primary,
                     child: const Icon(
                       Icons.local_offer,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 48,
                     ),
                   ),
@@ -143,9 +143,9 @@ class _PromotionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withValues(alpha: 0.6),
+                      AppColors.overlay,
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.3),
+                      AppColors.overlayLight,
                     ],
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
@@ -168,7 +168,7 @@ class _PromotionCard extends StatelessWidget {
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusSm),
                         ),
@@ -184,7 +184,7 @@ class _PromotionCard extends StatelessWidget {
                     Text(
                       promotion.name,
                       style: AppTypography.titleMedium.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -192,7 +192,7 @@ class _PromotionCard extends StatelessWidget {
                       Text(
                         promotion.description!,
                         style: AppTypography.bodySmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: AppColors.white.withValues(alpha: 0.9),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

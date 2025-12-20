@@ -23,11 +23,11 @@ class ProviderCard extends StatelessWidget {
       child: Container(
         width: width,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: AppColors.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -73,14 +73,14 @@ class ProviderCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: provider.isOpen ? Colors.green : Colors.red,
+                        color: provider.isOpen ? AppColors.success : AppColors.error,
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusSm),
                       ),
                       child: Text(
                         provider.isOpen ? 'Ouvert' : 'Fermé',
                         style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white,
+                          color: AppColors.textOnPrimary,
                           fontSize: 10,
                         ),
                       ),
@@ -119,7 +119,7 @@ class ProviderCard extends StatelessWidget {
                   Row(
                     children: [
                       // Rating
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      const Icon(Icons.star, color: AppColors.rating, size: 16),
                       const SizedBox(width: 2),
                       Text(
                         provider.ratingText,
@@ -194,11 +194,11 @@ class ProviderListTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.shadow,
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -257,7 +257,7 @@ class ProviderListTile extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: provider.isOpen ? Colors.green : Colors.red,
+                          color: provider.isOpen ? AppColors.success : AppColors.error,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -273,7 +273,7 @@ class ProviderListTile extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: AppColors.rating, size: 14),
                       const SizedBox(width: 2),
                       Text(
                         provider.ratingText,

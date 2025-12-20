@@ -106,7 +106,7 @@ class _FilterButton extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: hasActiveFilters ? AppColors.primary : Colors.white,
+          color: hasActiveFilters ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
             color: hasActiveFilters ? AppColors.primary : AppColors.grey300,
@@ -118,13 +118,13 @@ class _FilterButton extends StatelessWidget {
             Icon(
               Icons.tune,
               size: 18,
-              color: hasActiveFilters ? Colors.white : AppColors.textSecondary,
+              color: hasActiveFilters ? AppColors.textOnPrimary : AppColors.textSecondary,
             ),
             const SizedBox(width: 4),
             Text(
               'Filtres',
               style: AppTypography.labelMedium.copyWith(
-                color: hasActiveFilters ? Colors.white : AppColors.textPrimary,
+                color: hasActiveFilters ? AppColors.textOnPrimary : AppColors.textPrimary,
               ),
             ),
             if (filterCount > 0) ...[
@@ -132,13 +132,13 @@ class _FilterButton extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: hasActiveFilters ? Colors.white : AppColors.primary,
-                  borderRadius: BorderRadius.circular(10),
+                  color: hasActiveFilters ? AppColors.white : AppColors.primary,
+                  borderRadius: AppSpacing.borderRadiusSm,
                 ),
                 child: Text(
                   '$filterCount',
                   style: AppTypography.labelSmall.copyWith(
-                    color: hasActiveFilters ? AppColors.primary : Colors.white,
+                    color: hasActiveFilters ? AppColors.primary : AppColors.textOnPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -176,7 +176,7 @@ class _FilterChip extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.grey300,

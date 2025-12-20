@@ -62,4 +62,14 @@ class AppColors {
 
   // Shadow color
   static const Color shadow = Color(0x1A000000);
+
+  // Rating color (for stars)
+  static const Color rating = Color(0xFFFFC107);
+
+  // Overlay/scrim colors
+  static const Color overlay = Color(0x99000000); // 60% black
+  static const Color overlayLight = Color(0x4D000000); // 30% black
+
+  // Splash screen
+  static const Color splashBackground = Color(0xFF8B1538);
 }

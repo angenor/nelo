@@ -78,7 +78,7 @@ class _CuisineFilterItem extends StatelessWidget {
                     ]
                   : [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: AppColors.shadow,
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),

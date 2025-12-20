@@ -161,7 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                         activeColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: AppSpacing.borderRadiusXs,
                         ),
                       ),
                     ),

@@ -285,7 +285,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       backgroundColor: AppColors.primary,
                       child: Icon(
                         _isMapView ? Icons.list : Icons.map,
-                        color: Colors.white,
+                        color: AppColors.textOnPrimary,
                       ),
                     ),
                   ),
