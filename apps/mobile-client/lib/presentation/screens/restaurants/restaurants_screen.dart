@@ -21,6 +21,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   // Filter
   CuisineType? _selectedCuisine;
 
+  // Favorites (local state for now)
+  final Set<String> _favoriteIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -63,15 +66,24 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     _loadRestaurants();
   }
 
+  void _toggleFavorite(String restaurantId) {
+    setState(() {
+      if (_favoriteIds.contains(restaurantId)) {
+        _favoriteIds.remove(restaurantId);
+      } else {
+        _favoriteIds.add(restaurantId);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with delivery address (like home page)
+            // Header with delivery address (stays fixed)
             HomeHeader(
               location: 'Tiassale, Centre-ville',
               onLocationTap: () {
@@ -82,89 +94,123 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               },
             ),
 
-            // Page title
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              child: Text(
-                'Restaurants',
-                style: AppTypography.headlineMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: GestureDetector(
-                onTap: () => context.push('/search?type=restaurants'),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.grey100,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'Rechercher un restaurant...',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Cuisine filter grid with images
-            CuisineFilterGrid(
-              selectedCuisine: _selectedCuisine,
-              onCuisineSelected: _onCuisineSelected,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Restaurant list
+            // Scrollable content
             Expanded(
               child: _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(color: AppColors.primary),
                     )
-                  : _restaurants.isEmpty
-                      ? _EmptyState(
-                          onClearFilter: () => _onCuisineSelected(null),
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          itemCount: _restaurants.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: AppSpacing.lg),
-                          itemBuilder: (context, index) {
-                            final restaurant = _restaurants[index];
-                            return RestaurantCard(
-                              restaurant: restaurant,
-                              onTap: () {
-                                context.push('/provider/${restaurant.id}');
-                              },
-                            );
-                          },
+                  : CustomScrollView(
+                      slivers: [
+                        // Page title
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: Text(
+                              'Restaurants',
+                              style: AppTypography.headlineMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
+
+                        // Search bar
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                            child: GestureDetector(
+                              onTap: () => context.push('/search?type=restaurants'),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md,
+                                  vertical: AppSpacing.sm,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.grey100,
+                                  borderRadius:
+                                      BorderRadius.circular(AppSpacing.radiusFull),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.search,
+                                      color: AppColors.textSecondary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Text(
+                                      'Rechercher un restaurant...',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: AppSpacing.md),
+                        ),
+
+                        // Cuisine filter grid with images
+                        SliverToBoxAdapter(
+                          child: CuisineFilterGrid(
+                            selectedCuisine: _selectedCuisine,
+                            onCuisineSelected: _onCuisineSelected,
+                          ),
+                        ),
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: AppSpacing.md),
+                        ),
+
+                        // Restaurant list or empty state
+                        if (_restaurants.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _EmptyState(
+                              onClearFilter: () => _onCuisineSelected(null),
+                            ),
+                          )
+                        else
+                          SliverPadding(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final restaurant = _restaurants[index];
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: index < _restaurants.length - 1
+                                          ? AppSpacing.lg
+                                          : 0,
+                                    ),
+                                    child: RestaurantCard(
+                                      restaurant: restaurant,
+                                      isFavorite:
+                                          _favoriteIds.contains(restaurant.id),
+                                      onFavoriteTap: () =>
+                                          _toggleFavorite(restaurant.id),
+                                      onTap: () {
+                                        context.push('/provider/${restaurant.id}');
+                                      },
+                                    ),
+                                  );
+                                },
+                                childCount: _restaurants.length,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
             ),
           ],
         ),

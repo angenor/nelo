@@ -8,10 +8,14 @@ class RestaurantCard extends StatelessWidget {
     super.key,
     required this.restaurant,
     this.onTap,
+    this.onFavoriteTap,
+    this.isFavorite = false,
   });
 
   final Provider restaurant;
   final VoidCallback? onTap;
+  final VoidCallback? onFavoriteTap;
+  final bool isFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -20,19 +24,50 @@ class RestaurantCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cover image with rounded corners on all sides
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: restaurant.coverImageUrl != null
-                  ? Image.network(
-                      restaurant.coverImageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _ImagePlaceholder(),
-                    )
-                  : _ImagePlaceholder(),
-            ),
+          // Cover image with rounded corners on all sides + favorite button
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                child: AspectRatio(
+                  aspectRatio: 2.2, // Reduced height (was 16/9 ≈ 1.78)
+                  child: restaurant.coverImageUrl != null
+                      ? Image.network(
+                          restaurant.coverImageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _ImagePlaceholder(),
+                        )
+                      : _ImagePlaceholder(),
+                ),
+              ),
+              // Favorite button
+              Positioned(
+                top: AppSpacing.sm,
+                right: AppSpacing.sm,
+                child: GestureDetector(
+                  onTap: onFavoriteTap,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : AppColors.textSecondary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: AppSpacing.sm),
