@@ -44,12 +44,12 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Categories
-                CategoriesSection(
-                  categories: MockData.categories,
-                  onCategoryTap: (category) {
-                    // TODO: Navigate to category screen
-                    context.push('${AppRoutes.search}?type=${category.slug}');
+                // MVP Services - 4 main categories
+                ServiceCategoriesSection(
+                  services: MockData.services,
+                  onServiceTap: (service) {
+                    // Navigate to the appropriate service screen
+                    context.push(service.routePath);
                   },
                 ),
 

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'cuisine_type.dart';
 import 'provider_category.dart';
 
 /// Provider entity (restaurant, gas depot, etc.)
@@ -29,6 +30,7 @@ class Provider extends Equatable {
     this.isOpen = false,
     this.isFeatured = false,
     this.distanceKm,
+    this.cuisineType,
   });
 
   final String id;
@@ -56,6 +58,7 @@ class Provider extends Equatable {
   final bool isOpen;
   final bool isFeatured;
   final double? distanceKm;
+  final CuisineType? cuisineType;
 
   @override
   List<Object?> get props => [id, name, slug, type];

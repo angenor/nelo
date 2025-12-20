@@ -468,3 +468,207 @@ class ProviderMenuResponse(BaseModel):
     uncategorized_products: list[ProductResponse] = []
     gas_products: list[GasProductResponse] = []
     total_products: int = 0
+
+
+# =============================================================================
+# Order Schemas
+# =============================================================================
+
+
+class OrderItemOptionCreate(BaseModel):
+    """Order item option for creation."""
+
+    option_id: UUID
+    option_item_id: UUID
+    name: str
+    value: str
+    price_adjustment: int = 0
+
+
+class OrderItemCreate(BaseModel):
+    """Order item for creation."""
+
+    product_id: UUID
+    quantity: int = Field(..., ge=1, le=100)
+    unit_price: int = Field(..., ge=0)
+    special_instructions: Optional[str] = Field(None, max_length=500)
+    options: list[OrderItemOptionCreate] = []
+
+
+class OrderCreate(BaseModel):
+    """Order creation schema."""
+
+    provider_id: UUID
+    delivery_address_id: Optional[UUID] = None
+    delivery_address_snapshot: Optional[dict] = None
+    items: list[OrderItemCreate] = Field(..., min_length=1)
+    special_instructions: Optional[str] = Field(None, max_length=1000)
+    promo_code: Optional[str] = Field(None, max_length=50)
+    payment_method: str = Field(
+        default="wallet", pattern="^(wallet|cash|wave|orange_money)$"
+    )
+    scheduled_for: Optional[datetime] = None
+
+
+class OrderItemOptionResponse(BaseModel):
+    """Order item option response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    option_id: UUID
+    option_item_id: UUID
+    name: str
+    value: str
+    price_adjustment: int = 0
+
+
+class OrderItemResponse(BaseModel):
+    """Order item response schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    product_id: UUID
+    product_name: str
+    product_image_url: Optional[str] = None
+    quantity: int
+    unit_price: int
+    total_price: int
+    special_instructions: Optional[str] = None
+    options: list[OrderItemOptionResponse] = []
+
+
+class OrderStatusHistoryResponse(BaseModel):
+    """Order status history entry."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    status: str
+    notes: Optional[str] = None
+    changed_by_id: Optional[UUID] = None
+    created_at: datetime
+
+
+class OrderSummary(BaseModel):
+    """Order summary for list views."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    reference: str
+    provider_id: UUID
+    provider_name: str
+    provider_logo_url: Optional[str] = None
+    status: str
+    subtotal: int
+    delivery_fee: int
+    total_amount: int
+    item_count: int
+    created_at: datetime
+    estimated_delivery_time: Optional[datetime] = None
+
+
+class OrderResponse(BaseModel):
+    """Full order response schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    reference: str
+    user_id: UUID
+    provider_id: UUID
+    provider_name: str
+    provider_phone: Optional[str] = None
+    provider_logo_url: Optional[str] = None
+    status: str
+    payment_status: str
+    payment_method: str
+    subtotal: int
+    delivery_fee: int
+    service_fee: int
+    discount_amount: int
+    total_amount: int
+    promo_code: Optional[str] = None
+    special_instructions: Optional[str] = None
+    delivery_address_snapshot: Optional[dict] = None
+    scheduled_for: Optional[datetime] = None
+    estimated_delivery_time: Optional[datetime] = None
+    confirmed_at: Optional[datetime] = None
+    preparing_at: Optional[datetime] = None
+    ready_at: Optional[datetime] = None
+    picked_up_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    cancellation_reason: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    items: list[OrderItemResponse] = []
+    status_history: list[OrderStatusHistoryResponse] = []
+
+
+class OrderListResponse(BaseModel):
+    """Order list response with pagination."""
+
+    orders: list[OrderSummary]
+    total: int
+    page: int = 1
+    page_size: int = 20
+    has_next: bool = False
+
+
+class OrderStatusUpdate(BaseModel):
+    """Order status update request."""
+
+    status: str = Field(
+        ...,
+        pattern="^(confirmed|preparing|ready|picked_up|delivering|delivered|cancelled|failed)$",
+    )
+    notes: Optional[str] = Field(None, max_length=500)
+    cancellation_reason: Optional[str] = Field(None, max_length=500)
+
+
+class OrderTrackingResponse(BaseModel):
+    """Order tracking response with delivery info."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    order_id: UUID
+    reference: str
+    status: str
+    provider_name: str
+    provider_phone: Optional[str] = None
+    estimated_delivery_time: Optional[datetime] = None
+    delivery_id: Optional[UUID] = None
+    driver_id: Optional[UUID] = None
+    driver_name: Optional[str] = None
+    driver_phone: Optional[str] = None
+    driver_photo_url: Optional[str] = None
+    driver_rating: Optional[Decimal] = None
+    driver_latitude: Optional[Decimal] = None
+    driver_longitude: Optional[Decimal] = None
+    driver_location_updated_at: Optional[datetime] = None
+    status_history: list[OrderStatusHistoryResponse] = []
+
+
+class OrderRatingCreate(BaseModel):
+    """Order rating creation schema."""
+
+    overall_rating: int = Field(..., ge=1, le=5)
+    food_rating: Optional[int] = Field(None, ge=1, le=5)
+    delivery_rating: Optional[int] = Field(None, ge=1, le=5)
+    comment: Optional[str] = Field(None, max_length=1000)
+
+
+class OrderRatingResponse(BaseModel):
+    """Order rating response schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    order_id: UUID
+    user_id: UUID
+    overall_rating: int
+    food_rating: Optional[int] = None
+    delivery_rating: Optional[int] = None
+    comment: Optional[str] = None
+    created_at: datetime

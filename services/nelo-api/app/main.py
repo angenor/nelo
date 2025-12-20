@@ -9,11 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.database import check_db_connection, engine
 from app.core.redis import check_redis_connection, close_redis_pool
+from app.shared.events import register_event_handlers
 
 # Import module routers
 from app.modules.auth.router import router as auth_router
 from app.modules.users.router import router as users_router
-from app.modules.orders.router import router as orders_router
+from app.modules.orders.router import router as orders_module_router
+from app.modules.orders.routers.orders import router as orders_router
 from app.modules.orders.routers.providers import router as providers_router
 from app.modules.orders.routers.products import router as products_router
 from app.modules.deliveries.router import router as deliveries_router
@@ -24,11 +26,15 @@ settings = get_settings()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan events."""
     # Startup
     print(f"Starting {settings.app_name} v{settings.app_version}")
     print(f"Environment: {settings.environment}")
+
+    # Register event handlers for order/delivery notifications
+    register_event_handlers()
+    print("Event handlers registered")
 
     yield
 
@@ -89,6 +95,7 @@ def create_app() -> FastAPI:
     # Include API routers
     app.include_router(auth_router, prefix=settings.api_v1_prefix)
     app.include_router(users_router, prefix=settings.api_v1_prefix)
+    app.include_router(orders_module_router, prefix=settings.api_v1_prefix)
     app.include_router(orders_router, prefix=settings.api_v1_prefix)
     app.include_router(providers_router, prefix=settings.api_v1_prefix)
     app.include_router(products_router, prefix=settings.api_v1_prefix)

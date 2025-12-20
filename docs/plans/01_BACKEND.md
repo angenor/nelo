@@ -215,12 +215,12 @@ GET  /api/v1/orders/:id/tracking # Suivi
 ```
 
 **Taches:**
-- [ ] Validation du panier
+- [x] Validation du panier
   - Verification disponibilite produits
   - Calcul des prix
   - Application des promotions
-- [ ] Snapshot de l'adresse de livraison (JSONB)
-- [ ] Generation reference unique (ORD-XXXXXXXX)
+- [x] Snapshot de l'adresse de livraison (JSONB)
+- [x] Generation reference unique (ORD-XXXXXXXX)
 
 ### 4.2 Machine d'Etats (Order Status)
 
@@ -230,10 +230,10 @@ pending -> confirmed -> preparing -> ready -> picked_up -> delivering -> deliver
 cancelled  cancelled   cancelled  cancelled   cancelled       failed
 ```
 
-- [ ] Implementer les transitions d'etat
-- [ ] Historique des changements (order_status_history)
-- [ ] Validation des transitions
-- [ ] Notifications a chaque changement
+- [x] Implementer les transitions d'etat
+- [x] Historique des changements (order_status_history)
+- [x] Validation des transitions
+- [x] Notifications a chaque changement
 
 ### 4.3 Module Livraisons
 
@@ -258,26 +258,26 @@ score = (
 )
 ```
 
-- [ ] Systeme d'offres (delivery_offers)
-- [ ] Acceptation/Refus des courses
-- [ ] Tracking GPS en temps reel
+- [x] Systeme d'offres (delivery_offers)
+- [x] Acceptation/Refus des courses
+- [x] Tracking GPS en temps reel
 
 ### 4.4 Bus d'Evenements Interne
 
 - [x] Implementer EventBus (in-process) *(fait en M1)*
-- [ ] Evenements:
+- [x] Evenements:
   - `order.created`
   - `order.confirmed`
   - `order.ready`
   - `delivery.assigned`
   - `delivery.picked_up`
   - `delivery.completed`
-- [ ] Handlers de notifications
+- [x] Handlers de notifications
 
 ### Livrables M4
-- [ ] Flux de commande complet
-- [ ] Matching livreurs fonctionnel
-- [ ] Suivi en temps reel (polling)
+- [x] Flux de commande complet
+- [x] Matching livreurs fonctionnel
+- [x] Suivi en temps reel (polling)
 
 ---
 

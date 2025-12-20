@@ -1,10 +1,51 @@
+import 'package:flutter/material.dart';
 import '../../domain/entities/entities.dart';
 
 /// Mock data for development without backend
 class MockData {
   MockData._();
 
-  /// Service categories
+  /// MVP Services - 4 main services on home screen
+  static const List<ServiceCategory> services = [
+    ServiceCategory(
+      id: 'srv-restaurant',
+      name: 'Restaurants',
+      type: ServiceType.restaurant,
+      icon: Icons.restaurant,
+      color: Color(0xFFFF6B35),
+      routePath: '/restaurants',
+      description: 'Commander vos repas',
+    ),
+    ServiceCategory(
+      id: 'srv-gas',
+      name: 'Gaz',
+      type: ServiceType.gas,
+      icon: Icons.local_fire_department,
+      color: Color(0xFFFF9500),
+      routePath: '/gas',
+      description: 'Recharge ou echange de bouteilles',
+    ),
+    ServiceCategory(
+      id: 'srv-errands',
+      name: 'Courses',
+      type: ServiceType.errands,
+      icon: Icons.shopping_basket,
+      color: Color(0xFF34C759),
+      routePath: '/errands',
+      description: 'Faites faire vos courses',
+    ),
+    ServiceCategory(
+      id: 'srv-parcel',
+      name: 'Colis',
+      type: ServiceType.parcel,
+      icon: Icons.local_shipping,
+      color: Color(0xFF007AFF),
+      routePath: '/parcel',
+      description: 'Envoyez vos colis',
+    ),
+  ];
+
+  /// Provider categories (for search/filter)
   static const List<ProviderCategory> categories = [
     ProviderCategory(
       id: '1',
@@ -22,7 +63,7 @@ class MockData {
     ),
     ProviderCategory(
       id: '3',
-      name: 'Épiceries',
+      name: 'Epiceries',
       slug: 'epiceries',
       providerType: ProviderType.grocery,
       displayOrder: 3,
@@ -58,6 +99,7 @@ class MockData {
       slug: 'chez-tantine-marie',
       description: 'Cuisine africaine traditionnelle',
       type: ProviderType.restaurant,
+      cuisineType: CuisineType.african,
       phone: '0707000001',
       addressLine1: 'Quartier Commerce, Tiassalé',
       cityId: 'tiassale',
@@ -80,6 +122,7 @@ class MockData {
       slug: 'le-maquis-du-port',
       description: 'Poissons braisés et attiéké',
       type: ProviderType.restaurant,
+      cuisineType: CuisineType.seafood,
       phone: '0707000002',
       addressLine1: 'Près du port, Tiassalé',
       cityId: 'tiassale',
@@ -102,6 +145,7 @@ class MockData {
       slug: 'fast-food-abi',
       description: 'Hamburgers, shawarmas, pizzas',
       type: ProviderType.restaurant,
+      cuisineType: CuisineType.fastFood,
       phone: '0707000003',
       addressLine1: 'Centre-ville, Tiassalé',
       cityId: 'tiassale',
@@ -124,6 +168,7 @@ class MockData {
       slug: 'restaurant-le-palmier',
       description: 'Cuisine ivoirienne et européenne',
       type: ProviderType.restaurant,
+      cuisineType: CuisineType.ivorian,
       phone: '0707000004',
       addressLine1: 'Route de Divo, Tiassalé',
       cityId: 'tiassale',
@@ -225,6 +270,7 @@ class MockData {
           slug: 'grillades-du-soir',
           description: 'Viandes grillées et brochettes',
           type: ProviderType.restaurant,
+          cuisineType: CuisineType.grilled,
           phone: '0707000005',
           addressLine1: 'Quartier Résidentiel, Tiassalé',
           cityId: 'tiassale',
@@ -247,6 +293,7 @@ class MockData {
           slug: 'snack-chez-adjoua',
           description: 'Allocodrome et garba',
           type: ProviderType.restaurant,
+          cuisineType: CuisineType.ivorian,
           phone: '0707000006',
           addressLine1: 'Gare routière, Tiassalé',
           cityId: 'tiassale',
@@ -349,6 +396,11 @@ class MockData {
           distanceKm: 2.2,
         ),
       ];
+
+  /// All restaurants for restaurant list screen
+  static List<Provider> get allRestaurants => allProviders
+      .where((p) => p.type == ProviderType.restaurant)
+      .toList();
 
   /// Search suggestions
   static const List<String> searchSuggestions = [

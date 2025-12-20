@@ -167,10 +167,10 @@ apps/mobile-client/
 > Flux classique : catalogue → panier → checkout
 
 #### 3.1 Liste Restaurants
-- [ ] Liste des restaurants (`orders.providers` WHERE type='restaurant')
-- [ ] Filtres (cuisine, note, temps de preparation)
-- [ ] Tri (distance, popularite, note)
-- [ ] Indicateur ouvert/ferme (`is_open`)
+- [x] Liste des restaurants (`orders.providers` WHERE type='restaurant')
+- [x] Filtres (cuisine, note, temps de preparation)
+- [x] Tri (distance, popularite, note)
+- [x] Indicateur ouvert/ferme (`is_open`)
 
 #### 3.2 Detail Restaurant
 - [ ] Header (cover_image_url, logo_url, name, average_rating)

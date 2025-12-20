@@ -6,6 +6,7 @@ import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
+import '../presentation/screens/restaurants/restaurants_screen.dart';
 import '../presentation/screens/search/search_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 
@@ -20,6 +21,13 @@ class AppRoutes {
   static const String verifyOtp = '/verify-otp';
   static const String home = '/home';
   static const String search = '/search';
+
+  // MVP Service routes
+  static const String restaurants = '/restaurants';
+  static const String gas = '/gas';
+  static const String errands = '/errands';
+  static const String parcel = '/parcel';
+
   static const String providerDetail = '/provider/:id';
   static const String productDetail = '/product/:id';
   static const String cart = '/cart';
@@ -208,6 +216,50 @@ class AppRouter {
         builder: (context, state) =>
             const _PlaceholderScreen(title: 'Notifications'),
       ),
+
+      // MVP Service routes
+      GoRoute(
+        path: AppRoutes.restaurants,
+        name: 'restaurants',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const RestaurantsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.gas,
+        name: 'gas',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _ServicePlaceholderScreen(
+              title: 'Commander du Gaz',
+              icon: Icons.local_fire_department,
+              color: Color(0xFFFF9500),
+              description: 'Carte + selection depot + bouteille',
+            ),
+      ),
+      GoRoute(
+        path: AppRoutes.errands,
+        name: 'errands',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _ServicePlaceholderScreen(
+              title: 'Faire mes courses',
+              icon: Icons.shopping_basket,
+              color: Color(0xFF34C759),
+              description: 'Carte + liste de courses + note vocale',
+            ),
+      ),
+      GoRoute(
+        path: AppRoutes.parcel,
+        name: 'parcel',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const _ServicePlaceholderScreen(
+              title: 'Envoyer un colis',
+              icon: Icons.local_shipping,
+              color: Color(0xFF007AFF),
+              description: 'Carte multi-points + description colis',
+            ),
+      ),
     ],
     errorBuilder: (context, state) => _ErrorScreen(error: state.error),
   );
@@ -235,8 +287,85 @@ class _PlaceholderScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Écran en cours de développement',
+              'Ecran en cours de developpement',
               style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Service placeholder screen with custom icon and color
+class _ServicePlaceholderScreen extends StatelessWidget {
+  const _ServicePlaceholderScreen({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.description,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color color;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: color.withValues(alpha: 0.1),
+        foregroundColor: color,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(icon, size: 56, color: color),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                description,
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.construction, size: 20, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Text(
+                    'En cours de developpement',
+                    style: TextStyle(color: Colors.amber),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
