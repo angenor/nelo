@@ -14,6 +14,8 @@ from app.core.redis import check_redis_connection, close_redis_pool
 from app.modules.auth.router import router as auth_router
 from app.modules.users.router import router as users_router
 from app.modules.orders.router import router as orders_router
+from app.modules.orders.routers.providers import router as providers_router
+from app.modules.orders.routers.products import router as products_router
 from app.modules.deliveries.router import router as deliveries_router
 from app.modules.payments.router import router as payments_router
 from app.modules.notifications.router import router as notifications_router
@@ -88,6 +90,8 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix=settings.api_v1_prefix)
     app.include_router(users_router, prefix=settings.api_v1_prefix)
     app.include_router(orders_router, prefix=settings.api_v1_prefix)
+    app.include_router(providers_router, prefix=settings.api_v1_prefix)
+    app.include_router(products_router, prefix=settings.api_v1_prefix)
     app.include_router(deliveries_router, prefix=settings.api_v1_prefix)
     app.include_router(payments_router, prefix=settings.api_v1_prefix)
     app.include_router(notifications_router, prefix=settings.api_v1_prefix)

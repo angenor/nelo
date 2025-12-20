@@ -3,3 +3,4 @@ export 'product.dart';
 export 'promotion.dart';
 export 'provider.dart';
 export 'provider_category.dart';
+export 'search_filter.dart';

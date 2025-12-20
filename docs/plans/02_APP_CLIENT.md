@@ -120,10 +120,10 @@ apps/mobile-client/
 - [x] Bottom navigation bar
 
 #### 2.2 Recherche
-- [ ] Barre de recherche avec suggestions
-- [ ] Filtres (categorie, distance, note, prix)
-- [ ] Liste des resultats
-- [ ] Vue carte (Google Maps)
+- [x] Barre de recherche avec suggestions
+- [x] Filtres (categorie, distance, note, prix)
+- [x] Liste des resultats
+- [x] Vue carte (Google Maps)
 - [ ] Infinite scroll
 
 #### 2.3 Detail Prestataire

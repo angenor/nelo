@@ -171,30 +171,30 @@ PUT  /api/v1/providers/:id       # Modifier
 ```
 
 **Taches:**
-- [ ] Types de prestataires (Restaurant, Depot gaz, Epicerie)
-- [ ] Recherche geospatiale (PostGIS)
-  - Providers dans un rayon
-  - Tri par distance
-- [ ] Systeme d'horaires (schedules)
-- [ ] Calcul `is_open` en temps reel
+- [x] Types de prestataires (Restaurant, Depot gaz, Epicerie)
+- [x] Recherche geospatiale (PostGIS)
+  - [x] Providers dans un rayon
+  - [x] Tri par distance
+- [x] Systeme d'horaires (schedules)
+- [x] Calcul `is_open` en temps reel
 
 ### 3.2 Gestion des Produits
-- [ ] CRUD produits standards
-- [ ] CRUD produits gaz (gas_products)
-- [ ] Categories de produits
-- [ ] Options et variations
-- [ ] Gestion des prix
-- [ ] Disponibilite (stock)
+- [x] CRUD produits standards
+- [x] CRUD produits gaz (gas_products)
+- [x] Categories de produits
+- [x] Options et variations
+- [x] Gestion des prix
+- [x] Disponibilite (stock)
 
 ### 3.3 Cache et Performance
-- [ ] Cache Redis pour les menus (5 min TTL)
-- [ ] Cache des providers proches
-- [ ] Pagination et infinite scroll
+- [x] Cache Redis pour les menus (5 min TTL)
+- [ ] Cache des providers proches - a optimiser
+- [x] Pagination et infinite scroll
 
 ### Livrables M3
-- [ ] API catalogue complete
-- [ ] Recherche geolocalisee
-- [ ] Tests de performance (< 200ms latence)
+- [x] API catalogue complete
+- [x] Recherche geolocalisee
+- [ ] Tests de performance (< 200ms latence) - a valider
 
 ---
 

@@ -6,6 +6,7 @@ import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
+import '../presentation/screens/search/search_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 
 /// Route names
@@ -107,8 +108,12 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.search,
                 name: 'search',
-                builder: (context, state) =>
-                    const _PlaceholderScreen(title: 'Recherche'),
+                builder: (context, state) {
+                  final type = state.uri.queryParameters['type'];
+                  return SearchScreen(
+                    initialCategoryType: type,
+                  );
+                },
               ),
             ],
           ),
