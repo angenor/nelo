@@ -53,4 +53,9 @@ extension CuisineTypeLabel on CuisineType {
         return '🍽️';
     }
   }
+
+  /// Placeholder image URL for visual filter
+  String get imageUrl {
+    return 'https://picsum.photos/seed/cuisine-$name/100/100';
+  }
 }
