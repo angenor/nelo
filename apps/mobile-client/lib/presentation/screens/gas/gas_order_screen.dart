@@ -19,15 +19,22 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
   late List<Provider> _gasDepots;
   Provider? _selectedDepot;
 
-  // Order configuration
+  // Order configuration - all null by default (no pre-selection)
   Map<String, dynamic>? _selectedAddress;
   GasBottleSize? _selectedSize;
   GasBrand? _selectedBrand;
-  GasOrderType _orderType = GasOrderType.refill;
+  GasOrderType? _selectedOrderType;
 
-  // Sheet controller
+  // Sheet controller for progressive expansion
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+
+  // Sheet sizes for each step
+  // Initial size shows address + bottle size sections together
+  static const double _initialSize = 0.42;
+  static const double _stepBrandSize = 0.52;
+  static const double _stepOrderTypeSize = 0.65;
+  static const double _stepSummarySize = 0.85;
 
   @override
   void initState() {
@@ -40,10 +47,9 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
 
     // Select closest depot by default
     if (_gasDepots.isNotEmpty) {
-      _gasDepots.sort((a, b) =>
-          (a.distanceKm ?? 999).compareTo(b.distanceKm ?? 999));
+      _gasDepots.sort(
+          (a, b) => (a.distanceKm ?? 999).compareTo(b.distanceKm ?? 999));
       _selectedDepot = _gasDepots.first;
-      _loadDepotProducts();
     }
 
     // Select default address
@@ -54,36 +60,23 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
     _selectedAddress = defaultAddr;
   }
 
-  void _loadDepotProducts() {
-    if (_selectedDepot == null) return;
-
-    final sizes = MockData.getAvailableSizesForProvider(_selectedDepot!.id);
-    if (sizes.isNotEmpty) {
-      // Default to medium (12kg) if available, otherwise first
-      _selectedSize = sizes.contains(GasBottleSize.medium)
-          ? GasBottleSize.medium
-          : sizes.first;
-      _updateAvailableBrands();
-    }
-  }
-
-  void _updateAvailableBrands() {
-    if (_selectedDepot == null || _selectedSize == null) return;
-
-    final brands = MockData.getAvailableBrandsForSize(
-        _selectedDepot!.id, _selectedSize!);
-    if (brands.isNotEmpty && !brands.contains(_selectedBrand)) {
-      _selectedBrand = brands.first;
-    }
+  void _animateSheetTo(double size) {
+    _sheetController.animateTo(
+      size,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _onDepotSelected(Provider depot) {
     setState(() {
       _selectedDepot = depot;
+      // Reset selections when depot changes
       _selectedSize = null;
       _selectedBrand = null;
-      _loadDepotProducts();
+      _selectedOrderType = null;
     });
+    _animateSheetTo(_initialSize);
   }
 
   void _onAddressChanged(Map<String, dynamic> address) {
@@ -95,20 +88,30 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
   void _onSizeChanged(GasBottleSize size) {
     setState(() {
       _selectedSize = size;
-      _updateAvailableBrands();
+      // Reset brand when size changes (available brands may differ)
+      _selectedBrand = null;
+      _selectedOrderType = null;
     });
+    // Animate to show brand section
+    _animateSheetTo(_stepBrandSize);
   }
 
   void _onBrandChanged(GasBrand brand) {
     setState(() {
       _selectedBrand = brand;
+      // Reset order type when brand changes
+      _selectedOrderType = null;
     });
+    // Animate to show order type section
+    _animateSheetTo(_stepOrderTypeSize);
   }
 
   void _onOrderTypeChanged(GasOrderType type) {
     setState(() {
-      _orderType = type;
+      _selectedOrderType = type;
     });
+    // Animate to show summary
+    _animateSheetTo(_stepSummarySize);
   }
 
   GasProduct? get _selectedProduct {
@@ -121,8 +124,19 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
         _selectedDepot!.id, _selectedSize!, _selectedBrand!);
   }
 
+  /// Calculate current step (0-4)
+  int get _currentStep {
+    if (_selectedOrderType != null) return 4;
+    if (_selectedBrand != null) return 3;
+    if (_selectedSize != null) return 2;
+    if (_selectedAddress != null) return 1;
+    return 0;
+  }
+
   void _onOrder() {
-    if (_selectedProduct == null || _selectedAddress == null) {
+    if (_selectedProduct == null ||
+        _selectedAddress == null ||
+        _selectedOrderType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Veuillez compléter votre commande'),
@@ -136,7 +150,7 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
     context.push('/gas/confirm', extra: {
       'depot': _selectedDepot,
       'product': _selectedProduct,
-      'orderType': _orderType,
+      'orderType': _selectedOrderType,
       'address': _selectedAddress,
     });
   }
@@ -203,14 +217,21 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
           // Bottom sheet
           DraggableScrollableSheet(
             controller: _sheetController,
-            initialChildSize: 0.45,
+            initialChildSize: _initialSize,
             minChildSize: 0.25,
-            maxChildSize: 0.85,
+            maxChildSize: 0.90,
             snap: true,
-            snapSizes: const [0.25, 0.45, 0.85],
+            snapSizes: [
+              0.25,
+              _initialSize,
+              _stepBrandSize,
+              _stepOrderTypeSize,
+              _stepSummarySize,
+            ],
             builder: (context, scrollController) {
               return GasOrderSheet(
                 scrollController: scrollController,
+                currentStep: _currentStep,
                 addresses: MockData.userAddresses,
                 selectedAddress: _selectedAddress,
                 onAddressChanged: _onAddressChanged,
@@ -226,7 +247,7 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
                     : [],
                 selectedBrand: _selectedBrand,
                 onBrandChanged: _onBrandChanged,
-                orderType: _orderType,
+                selectedOrderType: _selectedOrderType,
                 onOrderTypeChanged: _onOrderTypeChanged,
                 selectedProduct: _selectedProduct,
                 onOrder: _onOrder,

@@ -3,11 +3,12 @@ import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/entities.dart';
 import 'address_picker_sheet.dart';
 
-/// Bottom sheet for gas order configuration
-class GasOrderSheet extends StatelessWidget {
+/// Bottom sheet for gas order configuration with progressive scroll
+class GasOrderSheet extends StatefulWidget {
   const GasOrderSheet({
     super.key,
     required this.scrollController,
+    required this.currentStep,
     required this.addresses,
     required this.selectedAddress,
     required this.onAddressChanged,
@@ -18,13 +19,14 @@ class GasOrderSheet extends StatelessWidget {
     required this.availableBrands,
     required this.selectedBrand,
     required this.onBrandChanged,
-    required this.orderType,
+    required this.selectedOrderType,
     required this.onOrderTypeChanged,
     required this.selectedProduct,
     required this.onOrder,
   });
 
   final ScrollController scrollController;
+  final int currentStep;
   final List<Map<String, dynamic>> addresses;
   final Map<String, dynamic>? selectedAddress;
   final ValueChanged<Map<String, dynamic>> onAddressChanged;
@@ -35,10 +37,69 @@ class GasOrderSheet extends StatelessWidget {
   final List<GasBrand> availableBrands;
   final GasBrand? selectedBrand;
   final ValueChanged<GasBrand> onBrandChanged;
-  final GasOrderType orderType;
+  final GasOrderType? selectedOrderType;
   final ValueChanged<GasOrderType> onOrderTypeChanged;
   final GasProduct? selectedProduct;
   final VoidCallback onOrder;
+
+  @override
+  State<GasOrderSheet> createState() => _GasOrderSheetState();
+}
+
+class _GasOrderSheetState extends State<GasOrderSheet> {
+  // Keys for scrolling to sections
+  final GlobalKey _brandSectionKey = GlobalKey();
+  final GlobalKey _orderTypeSectionKey = GlobalKey();
+  final GlobalKey _summarySectionKey = GlobalKey();
+
+  // Steps: 0=nothing, 1=address, 2=size, 3=brand, 4=orderType (complete)
+  static const int _totalSteps = 4;
+
+  int? _previousStep;
+
+  @override
+  void didUpdateWidget(GasOrderSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Auto-scroll when step changes
+    if (_previousStep != widget.currentStep && widget.currentStep > 1) {
+      _previousStep = widget.currentStep;
+      // Wait for sheet expansion animation (300ms) before scrolling
+      Future.delayed(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          _scrollToCurrentStep();
+        }
+      });
+    } else if (_previousStep != widget.currentStep) {
+      _previousStep = widget.currentStep;
+    }
+  }
+
+  void _scrollToCurrentStep() {
+    GlobalKey? targetKey;
+
+    switch (widget.currentStep) {
+      case 2: // Size selected -> scroll to brand
+        targetKey = _brandSectionKey;
+        break;
+      case 3: // Brand selected -> scroll to order type
+        targetKey = _orderTypeSectionKey;
+        break;
+      case 4: // Order type selected -> scroll to summary
+        targetKey = _summarySectionKey;
+        break;
+    }
+
+    if (targetKey?.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey!.currentContext!,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+        alignment: 0.0, // Align to top of viewport
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +118,7 @@ class GasOrderSheet extends StatelessWidget {
         ],
       ),
       child: ListView(
-        controller: scrollController,
+        controller: widget.scrollController,
         padding: EdgeInsets.zero,
         children: [
           // Drag handle
@@ -73,100 +134,274 @@ class GasOrderSheet extends StatelessWidget {
             ),
           ),
 
+          const SizedBox(height: AppSpacing.sm),
+
+          // Progress bar
+          _ProgressBar(currentStep: widget.currentStep, totalSteps: _totalSteps),
+
           const SizedBox(height: AppSpacing.md),
 
-          // Delivery address
-          _buildSectionTitle('Livrer à'),
+          // Step 1: Delivery address
+          _buildSectionTitle('Livrer à', isCompleted: widget.selectedAddress != null),
           _AddressSelector(
-            addresses: addresses,
-            selectedAddress: selectedAddress,
-            onChanged: onAddressChanged,
+            addresses: widget.addresses,
+            selectedAddress: widget.selectedAddress,
+            onChanged: widget.onAddressChanged,
           ),
 
-          const Divider(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
 
-          // Bottle size
-          _buildSectionTitle('Taille de bouteille'),
+          // Step 2: Bottle size
+          _buildSectionTitle(
+            'Taille de bouteille',
+            isCompleted: widget.selectedSize != null,
+            stepNumber: 1,
+          ),
           _BottleSizeSelector(
-            sizes: availableSizes,
-            selectedSize: selectedSize,
-            onChanged: onSizeChanged,
+            sizes: widget.availableSizes,
+            selectedSize: widget.selectedSize,
+            onChanged: widget.onSizeChanged,
           ),
 
-          const Divider(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
 
-          // Brand
-          if (availableBrands.isNotEmpty) ...[
-            _buildSectionTitle('Marque'),
-            _BrandSelector(
-              brands: availableBrands,
-              selectedBrand: selectedBrand,
-              onChanged: onBrandChanged,
-            ),
-            const Divider(height: AppSpacing.xl),
-          ],
-
-          // Order type (refill/exchange)
-          _buildSectionTitle('Type de commande'),
-          _OrderTypeSelector(
-            orderType: orderType,
-            onChanged: onOrderTypeChanged,
-          ),
-
-          const Divider(height: AppSpacing.xl),
-
-          // Order summary
-          _OrderSummary(
-            depot: depot,
-            product: selectedProduct,
-            orderType: orderType,
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // Order button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: ElevatedButton(
-              onPressed: selectedProduct != null ? onOrder : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          // Step 3: Brand
+          Container(
+            key: _brandSectionKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(
+                  'Marque',
+                  isCompleted: widget.selectedBrand != null,
+                  stepNumber: 2,
+                  isEnabled: widget.selectedSize != null,
                 ),
-                disabledBackgroundColor: AppColors.grey300,
-              ),
-              child: Text(
-                'Commander maintenant',
-                style: AppTypography.titleMedium.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
+                _BrandSelector(
+                  brands: widget.availableBrands,
+                  selectedBrand: widget.selectedBrand,
+                  onChanged: widget.onBrandChanged,
+                  isEnabled: widget.selectedSize != null,
                 ),
-              ),
+              ],
             ),
           ),
 
-          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.lg),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Step 4: Order type
+          Container(
+            key: _orderTypeSectionKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(
+                  'Type de commande',
+                  isCompleted: widget.selectedOrderType != null,
+                  stepNumber: 3,
+                  isEnabled: widget.selectedBrand != null,
+                ),
+                _OrderTypeSelector(
+                  selectedOrderType: widget.selectedOrderType,
+                  onChanged: widget.onOrderTypeChanged,
+                  isEnabled: widget.selectedBrand != null,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Summary
+          Container(
+            key: _summarySectionKey,
+            child: Column(
+              children: [
+                const Divider(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.sm),
+                _OrderSummary(
+                  depot: widget.depot,
+                  product: widget.selectedProduct,
+                  orderType: widget.selectedOrderType,
+                  isComplete: widget.selectedOrderType != null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // Order button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: ElevatedButton(
+                    onPressed: widget.selectedProduct != null &&
+                            widget.selectedOrderType != null
+                        ? widget.onOrder
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      disabledBackgroundColor: AppColors.grey300,
+                    ),
+                    child: Text(
+                      'Commander maintenant',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.xl),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(
+    String title, {
+    bool isCompleted = false,
+    int? stepNumber,
+    bool isEnabled = true,
+  }) {
+    final textColor = isEnabled ? null : AppColors.grey400;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.xs,
       ),
-      child: Text(
-        title,
-        style: AppTypography.titleSmall.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+      child: Row(
+        children: [
+          if (stepNumber != null) ...[
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: isCompleted
+                    ? AppColors.success
+                    : (isEnabled ? AppColors.grey200 : AppColors.grey100),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: isCompleted
+                    ? Icon(
+                        Icons.check,
+                        size: 14,
+                        color: AppColors.white,
+                      )
+                    : Text(
+                        '$stepNumber',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: isEnabled
+                              ? AppColors.textSecondary
+                              : AppColors.grey400,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Text(
+            title,
+            style: AppTypography.titleSmall.copyWith(
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          if (isCompleted && stepNumber == null) ...[
+            const SizedBox(width: AppSpacing.xs),
+            Icon(
+              Icons.check_circle,
+              size: 16,
+              color: AppColors.success,
+            ),
+          ],
+        ],
       ),
     );
+  }
+}
+
+/// Progress bar showing current step
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({
+    required this.currentStep,
+    required this.totalSteps,
+  });
+
+  final int currentStep;
+  final int totalSteps;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = currentStep / totalSteps;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _getStepLabel(),
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '$currentStep / $totalSteps',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 300),
+              tween: Tween(begin: 0, end: progress),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) {
+                return LinearProgressIndicator(
+                  value: value,
+                  backgroundColor: AppColors.grey200,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  minHeight: 6,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getStepLabel() {
+    switch (currentStep) {
+      case 0:
+        return 'Choisissez une taille';
+      case 1:
+        return 'Choisissez une taille';
+      case 2:
+        return 'Choisissez une marque';
+      case 3:
+        return 'Choisissez le type';
+      case 4:
+        return 'Prêt à commander';
+      default:
+        return '';
+    }
   }
 }
 
@@ -188,7 +423,6 @@ class _AddressSelector extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Padding(
-        // Permet au bottom sheet de remonter au-dessus du clavier
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -331,7 +565,8 @@ class _BottleSizeSelector extends StatelessWidget {
               ),
               child: GestureDetector(
                 onTap: () => onChanged(size),
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.md,
                   ),
@@ -350,9 +585,7 @@ class _BottleSizeSelector extends StatelessWidget {
                       Icon(
                         Icons.propane_tank,
                         size: 32,
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.grey400,
+                        color: isSelected ? AppColors.primary : AppColors.grey400,
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
@@ -390,14 +623,39 @@ class _BrandSelector extends StatelessWidget {
     required this.brands,
     required this.selectedBrand,
     required this.onChanged,
+    required this.isEnabled,
   });
 
   final List<GasBrand> brands;
   final GasBrand? selectedBrand;
   final ValueChanged<GasBrand> onChanged;
+  final bool isEnabled;
 
   @override
   Widget build(BuildContext context) {
+    if (brands.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.grey100,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Center(
+            child: Text(
+              isEnabled
+                  ? 'Aucune marque disponible'
+                  : 'Sélectionnez d\'abord une taille',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.grey400,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 50,
       child: ListView.separated(
@@ -410,8 +668,9 @@ class _BrandSelector extends StatelessWidget {
           final isSelected = brand == selectedBrand;
 
           return GestureDetector(
-            onTap: () => onChanged(brand),
-            child: Container(
+            onTap: isEnabled ? () => onChanged(brand) : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
@@ -431,9 +690,9 @@ class _BrandSelector extends StatelessWidget {
                   brand.name,
                   style: AppTypography.labelMedium.copyWith(
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
+                    color: isEnabled
+                        ? (isSelected ? AppColors.primary : AppColors.textPrimary)
+                        : AppColors.grey400,
                   ),
                 ),
               ),
@@ -448,12 +707,14 @@ class _BrandSelector extends StatelessWidget {
 /// Order type selector (refill/exchange)
 class _OrderTypeSelector extends StatelessWidget {
   const _OrderTypeSelector({
-    required this.orderType,
+    required this.selectedOrderType,
     required this.onChanged,
+    required this.isEnabled,
   });
 
-  final GasOrderType orderType;
+  final GasOrderType? selectedOrderType;
   final ValueChanged<GasOrderType> onChanged;
+  final bool isEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -461,15 +722,16 @@ class _OrderTypeSelector extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         children: GasOrderType.values.map((type) {
-          final isSelected = type == orderType;
+          final isSelected = type == selectedOrderType;
           return Expanded(
             child: Padding(
               padding: EdgeInsets.only(
                 right: type != GasOrderType.values.last ? AppSpacing.sm : 0,
               ),
               child: GestureDetector(
-                onTap: () => onChanged(type),
-                child: Container(
+                onTap: isEnabled ? () => onChanged(type) : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: isSelected
@@ -488,25 +750,29 @@ class _OrderTypeSelector extends StatelessWidget {
                             ? Icons.local_gas_station
                             : Icons.swap_horiz,
                         size: 28,
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.grey400,
+                        color: isEnabled
+                            ? (isSelected ? AppColors.primary : AppColors.grey400)
+                            : AppColors.grey300,
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         type.label,
                         style: AppTypography.labelMedium.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
+                          color: isEnabled
+                              ? (isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary)
+                              : AppColors.grey400,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         type.description,
                         style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: isEnabled
+                              ? AppColors.textSecondary
+                              : AppColors.grey400,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -528,15 +794,17 @@ class _OrderSummary extends StatelessWidget {
     required this.depot,
     required this.product,
     required this.orderType,
+    required this.isComplete,
   });
 
   final Provider? depot;
   final GasProduct? product;
-  final GasOrderType orderType;
+  final GasOrderType? orderType;
+  final bool isComplete;
 
   @override
   Widget build(BuildContext context) {
-    if (product == null || depot == null) {
+    if (!isComplete || product == null || depot == null || orderType == null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Container(
@@ -547,9 +815,9 @@ class _OrderSummary extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              'Sélectionnez une taille et une marque',
+              'Complétez les étapes ci-dessus',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: AppColors.grey400,
               ),
             ),
           ),
@@ -557,7 +825,7 @@ class _OrderSummary extends StatelessWidget {
       );
     }
 
-    final formattedPrice = product!.formatPrice(orderType);
+    final formattedPrice = product!.formatPrice(orderType!);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
