@@ -60,6 +60,32 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     );
   }
 
+  void _removeFromCart(Product product) {
+    setState(() {
+      final current = _cartItems[product.id] ?? 0;
+      if (current > 1) {
+        _cartItems[product.id] = current - 1;
+      } else {
+        _cartItems.remove(product.id);
+      }
+    });
+  }
+
+  void _addWithOptions(Product product, int quantity, Map<String, List<String>> selectedOptions) {
+    setState(() {
+      _cartItems[product.id] = (_cartItems[product.id] ?? 0) + quantity;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${product.name} x$quantity ajouté au panier'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.success,
+      ),
+    );
+  }
+
   int get _cartItemCount => _cartItems.values.fold(0, (a, b) => a + b);
 
   int get _cartTotal {
@@ -96,6 +122,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               category: category,
               cartItems: _cartItems,
               onAddToCart: _addToCart,
+              onRemoveFromCart: _removeFromCart,
+              onAddWithOptions: _addWithOptions,
             ),
           )),
 

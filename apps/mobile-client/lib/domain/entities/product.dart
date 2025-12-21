@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'menu_option.dart';
 
 /// Product entity
 class Product extends Equatable {
@@ -17,6 +18,7 @@ class Product extends Equatable {
     this.isSpicy = false,
     this.prepTime,
     this.displayOrder = 0,
+    this.options = const [],
   });
 
   final String id;
@@ -33,6 +35,7 @@ class Product extends Equatable {
   final bool isSpicy;
   final int? prepTime;
   final int displayOrder;
+  final List<MenuOption> options;
 
   @override
   List<Object?> get props => [id, providerId, name, price];
@@ -52,4 +55,10 @@ class Product extends Equatable {
     if (!hasDiscount) return null;
     return (((compareAtPrice! - price) / compareAtPrice!) * 100).round();
   }
+
+  /// Check if product has options
+  bool get hasOptions => options.isNotEmpty;
+
+  /// Check if product has required options
+  bool get hasRequiredOptions => options.any((o) => o.isRequired);
 }

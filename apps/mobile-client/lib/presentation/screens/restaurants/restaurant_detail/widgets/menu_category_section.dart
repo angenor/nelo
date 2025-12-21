@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/theme.dart';
 import '../../../../../domain/entities/entities.dart';
+import 'product_options_sheet.dart';
 
 /// Menu category section with products
 class MenuCategorySection extends StatelessWidget {
@@ -10,11 +11,15 @@ class MenuCategorySection extends StatelessWidget {
     required this.category,
     required this.cartItems,
     required this.onAddToCart,
+    required this.onRemoveFromCart,
+    required this.onAddWithOptions,
   });
 
   final MenuCategory category;
   final Map<String, int> cartItems;
   final ValueChanged<Product> onAddToCart;
+  final ValueChanged<Product> onRemoveFromCart;
+  final void Function(Product product, int quantity, Map<String, List<String>> selectedOptions) onAddWithOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +44,35 @@ class MenuCategorySection extends StatelessWidget {
         ...category.products.map((product) => _ProductCard(
               product: product,
               quantity: cartItems[product.id] ?? 0,
-              onAddToCart: () => onAddToCart(product),
+              onAddToCart: () {
+                if (product.hasOptions) {
+                  _showOptionsSheet(context, product);
+                } else {
+                  onAddToCart(product);
+                }
+              },
+              onRemoveFromCart: () => onRemoveFromCart(product),
             )),
 
         const SizedBox(height: AppSpacing.sm),
       ],
+    );
+  }
+
+  void _showOptionsSheet(BuildContext context, Product product) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ProductOptionsSheet(
+          product: product,
+          onAddToCart: onAddWithOptions,
+        ),
+      ),
     );
   }
 }
@@ -53,11 +82,13 @@ class _ProductCard extends StatelessWidget {
     required this.product,
     required this.quantity,
     required this.onAddToCart,
+    required this.onRemoveFromCart,
   });
 
   final Product product;
   final int quantity;
   final VoidCallback onAddToCart;
+  final VoidCallback onRemoveFromCart;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +185,13 @@ class _ProductCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                         ],
+                        if (product.hasOptions) ...[
+                          _ProductTag(
+                            icon: Icons.tune,
+                            color: AppColors.info,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         if (product.prepTime != null) ...[
                           Icon(
                             Icons.access_time,
@@ -177,7 +215,9 @@ class _ProductCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          product.priceText,
+                          product.hasOptions
+                              ? 'À partir de ${product.priceText}'
+                              : product.priceText,
                           style: AppTypography.titleSmall.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -244,10 +284,12 @@ class _ProductCard extends StatelessWidget {
 
                   const SizedBox(height: AppSpacing.xs),
 
-                  // Add button
-                  _AddToCartButton(
+                  // Add/Quantity button
+                  _QuantityButton(
                     quantity: quantity,
+                    hasOptions: product.hasOptions,
                     onAdd: onAddToCart,
+                    onRemove: onRemoveFromCart,
                   ),
                 ],
               ),
@@ -281,23 +323,24 @@ class _ProductTag extends StatelessWidget {
   }
 }
 
-class _AddToCartButton extends StatelessWidget {
-  const _AddToCartButton({
+class _QuantityButton extends StatelessWidget {
+  const _QuantityButton({
     required this.quantity,
+    required this.hasOptions,
     required this.onAdd,
+    required this.onRemove,
   });
 
   final int quantity;
+  final bool hasOptions;
   final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
+    // Show +/- controls when quantity > 0
     if (quantity > 0) {
       return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
         decoration: BoxDecoration(
           color: AppColors.primary,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -305,13 +348,42 @@ class _AddToCartButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check, size: 14, color: AppColors.white),
-            const SizedBox(width: 4),
-            Text(
-              '$quantity',
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
+            // Minus button
+            GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                child: const Icon(
+                  Icons.remove,
+                  size: 16,
+                  color: AppColors.white,
+                ),
+              ),
+            ),
+
+            // Quantity
+            Container(
+              constraints: const BoxConstraints(minWidth: 24),
+              child: Text(
+                '$quantity',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            // Plus button
+            GestureDetector(
+              onTap: onAdd,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                child: const Icon(
+                  Icons.add,
+                  size: 16,
+                  color: AppColors.white,
+                ),
               ),
             ),
           ],
@@ -319,6 +391,7 @@ class _AddToCartButton extends StatelessWidget {
       );
     }
 
+    // Show "Ajouter" button when quantity is 0
     return GestureDetector(
       onTap: onAdd,
       child: Container(

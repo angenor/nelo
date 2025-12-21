@@ -452,6 +452,45 @@ class MockData {
           price: 2500,
           isFeatured: true,
           prepTime: 25,
+          options: [
+            MenuOption(
+              id: 'opt1',
+              productId: 'prod1',
+              name: 'Portion',
+              type: MenuOptionType.single,
+              isRequired: true,
+              items: [
+                MenuOptionItem(id: 'opt1_1', optionId: 'opt1', name: 'Normal', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt1_2', optionId: 'opt1', name: 'Grande portion', priceAdjustment: 500),
+                MenuOptionItem(id: 'opt1_3', optionId: 'opt1', name: 'XL (2 personnes)', priceAdjustment: 1500),
+              ],
+            ),
+            MenuOption(
+              id: 'opt2',
+              productId: 'prod1',
+              name: 'Sauce',
+              type: MenuOptionType.single,
+              isRequired: false,
+              items: [
+                MenuOptionItem(id: 'opt2_1', optionId: 'opt2', name: 'Piment fort', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt2_2', optionId: 'opt2', name: 'Piment doux', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt2_3', optionId: 'opt2', name: 'Sans piment', priceAdjustment: 0),
+              ],
+            ),
+            MenuOption(
+              id: 'opt3',
+              productId: 'prod1',
+              name: 'Suppléments',
+              type: MenuOptionType.multiple,
+              isRequired: false,
+              maxSelections: 3,
+              items: [
+                MenuOptionItem(id: 'opt3_1', optionId: 'opt3', name: 'Oeuf frit', priceAdjustment: 200),
+                MenuOptionItem(id: 'opt3_2', optionId: 'opt3', name: 'Avocat', priceAdjustment: 300),
+                MenuOptionItem(id: 'opt3_3', optionId: 'opt3', name: 'Banane plantain', priceAdjustment: 250),
+              ],
+            ),
+          ],
         ),
         Product(
           id: 'prod2',
@@ -463,6 +502,31 @@ class MockData {
           price: 3000,
           isFeatured: true,
           prepTime: 30,
+          options: [
+            MenuOption(
+              id: 'opt4',
+              productId: 'prod2',
+              name: 'Type de poisson',
+              type: MenuOptionType.single,
+              isRequired: true,
+              items: [
+                MenuOptionItem(id: 'opt4_1', optionId: 'opt4', name: 'Carpe', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt4_2', optionId: 'opt4', name: 'Tilapia', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt4_3', optionId: 'opt4', name: 'Capitaine', priceAdjustment: 500),
+              ],
+            ),
+            MenuOption(
+              id: 'opt5',
+              productId: 'prod2',
+              name: 'Cuisson',
+              type: MenuOptionType.single,
+              isRequired: false,
+              items: [
+                MenuOptionItem(id: 'opt5_1', optionId: 'opt5', name: 'Bien braisé', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt5_2', optionId: 'opt5', name: 'Légèrement braisé', priceAdjustment: 0),
+              ],
+            ),
+          ],
         ),
         Product(
           id: 'prod3',
@@ -503,6 +567,20 @@ class MockData {
           imageUrl: 'https://picsum.photos/seed/brochette/300/200',
           price: 2000,
           prepTime: 15,
+          options: [
+            MenuOption(
+              id: 'opt6',
+              productId: 'prod5',
+              name: 'Nombre de brochettes',
+              type: MenuOptionType.single,
+              isRequired: true,
+              items: [
+                MenuOptionItem(id: 'opt6_1', optionId: 'opt6', name: '4 brochettes', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt6_2', optionId: 'opt6', name: '6 brochettes', priceAdjustment: 800),
+                MenuOptionItem(id: 'opt6_3', optionId: 'opt6', name: '8 brochettes', priceAdjustment: 1500),
+              ],
+            ),
+          ],
         ),
       ],
     ),
@@ -521,6 +599,20 @@ class MockData {
           imageUrl: 'https://picsum.photos/seed/foutou/300/200',
           price: 3500,
           prepTime: 35,
+          options: [
+            MenuOption(
+              id: 'opt7',
+              productId: 'prod6',
+              name: 'Viande',
+              type: MenuOptionType.single,
+              isRequired: true,
+              items: [
+                MenuOptionItem(id: 'opt7_1', optionId: 'opt7', name: 'Poulet', priceAdjustment: 0),
+                MenuOptionItem(id: 'opt7_2', optionId: 'opt7', name: 'Viande de boeuf', priceAdjustment: 500),
+                MenuOptionItem(id: 'opt7_3', optionId: 'opt7', name: 'Escargots', priceAdjustment: 1000),
+              ],
+            ),
+          ],
         ),
         Product(
           id: 'prod7',

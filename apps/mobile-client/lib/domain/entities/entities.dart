@@ -2,6 +2,7 @@
 export 'cuisine_type.dart';
 export 'menu_category.dart';
 export 'product.dart';
+export 'menu_option.dart';
 export 'promotion.dart';
 export 'provider.dart';
 export 'provider_category.dart';

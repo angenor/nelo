@@ -322,7 +322,7 @@ POST /api/v1/wallet/transfer     # Transfert P2P
 - `commission` - prelevement
 
 **Commissions:**
-- Prestataires: 15% par defaut
+- Prestataires: 10% par defaut
 - Livreurs: 10% par defaut
 
 - [ ] Audit trail complet
