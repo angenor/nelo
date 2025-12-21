@@ -24,6 +24,8 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
   GasBottleSize? _selectedSize;
   GasBrand? _selectedBrand;
   GasOrderType? _selectedOrderType;
+  String? _selectedPaymentMethod = 'cash'; // Default to cash payment
+  bool _isProcessing = false;
 
   // Sheet controller for progressive expansion
   final DraggableScrollableController _sheetController =
@@ -31,10 +33,11 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
 
   // Sheet sizes for each step
   // Initial size shows address + bottle size sections together
-  static const double _initialSize = 0.50;
-  static const double _stepBrandSize = 0.60;
-  static const double _stepOrderTypeSize = 0.70;
-  static const double _stepSummarySize = 0.85;
+  static const double _initialSize = 0.60;
+  static const double _stepBrandSize = 0.68;
+  static const double _stepOrderTypeSize = 0.76;
+  static const double _stepPaymentSize = 0.84;
+  static const double _stepSummarySize = 0.92;
 
   @override
   void initState() {
@@ -75,6 +78,7 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
       _selectedSize = null;
       _selectedBrand = null;
       _selectedOrderType = null;
+      _selectedPaymentMethod = 'cash';
     });
     _animateSheetTo(_initialSize);
   }
@@ -91,6 +95,7 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
       // Reset brand when size changes (available brands may differ)
       _selectedBrand = null;
       _selectedOrderType = null;
+      _selectedPaymentMethod = 'cash';
     });
     // Animate to show brand section
     _animateSheetTo(_stepBrandSize);
@@ -101,6 +106,7 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
       _selectedBrand = brand;
       // Reset order type when brand changes
       _selectedOrderType = null;
+      _selectedPaymentMethod = 'cash';
     });
     // Animate to show order type section
     _animateSheetTo(_stepOrderTypeSize);
@@ -109,6 +115,15 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
   void _onOrderTypeChanged(GasOrderType type) {
     setState(() {
       _selectedOrderType = type;
+      // Payment method keeps its value (default is 'cash')
+    });
+    // Animate to show summary (payment already has default value)
+    _animateSheetTo(_stepSummarySize);
+  }
+
+  void _onPaymentMethodChanged(String method) {
+    setState(() {
+      _selectedPaymentMethod = method;
     });
     // Animate to show summary
     _animateSheetTo(_stepSummarySize);
@@ -124,8 +139,11 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
         _selectedDepot!.id, _selectedSize!, _selectedBrand!);
   }
 
-  /// Calculate current step (0-4)
+  /// Calculate current step (0-5)
+  /// Payment method has a default value ('cash'), so step 5 is reached when orderType is selected
   int get _currentStep {
+    // When orderType is selected, payment already has default value so we're at step 5
+    if (_selectedOrderType != null && _selectedPaymentMethod != null) return 5;
     if (_selectedOrderType != null) return 4;
     if (_selectedBrand != null) return 3;
     if (_selectedSize != null) return 2;
@@ -133,10 +151,11 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
     return 0;
   }
 
-  void _onOrder() {
+  void _onOrder() async {
     if (_selectedProduct == null ||
         _selectedAddress == null ||
-        _selectedOrderType == null) {
+        _selectedOrderType == null ||
+        _selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Veuillez compléter votre commande'),
@@ -146,13 +165,26 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
       return;
     }
 
-    // Navigate to confirmation
-    context.push('/gas/confirm', extra: {
-      'depot': _selectedDepot,
-      'product': _selectedProduct,
-      'orderType': _selectedOrderType,
-      'address': _selectedAddress,
-    });
+    setState(() => _isProcessing = true);
+
+    // Simulate order processing
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    setState(() => _isProcessing = false);
+
+    // Show success dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _OrderSuccessDialog(
+        onDone: () {
+          Navigator.of(context).pop();
+          context.go('/home');
+        },
+      ),
+    );
   }
 
   @override
@@ -219,12 +251,13 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
             controller: _sheetController,
             initialChildSize: _initialSize,
             minChildSize: _initialSize,
-            maxChildSize: 0.90,
+            maxChildSize: 0.95,
             snap: true,
             snapSizes: [
               _initialSize,
               _stepBrandSize,
               _stepOrderTypeSize,
+              _stepPaymentSize,
               _stepSummarySize,
             ],
             builder: (context, scrollController) {
@@ -248,12 +281,83 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
                 onBrandChanged: _onBrandChanged,
                 selectedOrderType: _selectedOrderType,
                 onOrderTypeChanged: _onOrderTypeChanged,
+                selectedPaymentMethod: _selectedPaymentMethod,
+                onPaymentMethodChanged: _onPaymentMethodChanged,
                 selectedProduct: _selectedProduct,
                 onOrder: _onOrder,
+                isProcessing: _isProcessing,
               );
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Success dialog after order confirmation
+class _OrderSuccessDialog extends StatelessWidget {
+  const _OrderSuccessDialog({required this.onDone});
+
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Commande confirmée !',
+              style: AppTypography.headlineSmall.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Votre commande de gaz a été envoyée. Un livreur sera bientôt assigné.',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onDone,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+                child: const Text('Retour à l\'accueil'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

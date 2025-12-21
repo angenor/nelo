@@ -21,8 +21,11 @@ class GasOrderSheet extends StatefulWidget {
     required this.onBrandChanged,
     required this.selectedOrderType,
     required this.onOrderTypeChanged,
+    required this.selectedPaymentMethod,
+    required this.onPaymentMethodChanged,
     required this.selectedProduct,
     required this.onOrder,
+    required this.isProcessing,
   });
 
   final ScrollController scrollController;
@@ -39,8 +42,11 @@ class GasOrderSheet extends StatefulWidget {
   final ValueChanged<GasBrand> onBrandChanged;
   final GasOrderType? selectedOrderType;
   final ValueChanged<GasOrderType> onOrderTypeChanged;
+  final String? selectedPaymentMethod;
+  final ValueChanged<String> onPaymentMethodChanged;
   final GasProduct? selectedProduct;
   final VoidCallback onOrder;
+  final bool isProcessing;
 
   @override
   State<GasOrderSheet> createState() => _GasOrderSheetState();
@@ -50,10 +56,11 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
   // Keys for scrolling to sections
   final GlobalKey _brandSectionKey = GlobalKey();
   final GlobalKey _orderTypeSectionKey = GlobalKey();
+  final GlobalKey _paymentSectionKey = GlobalKey();
   final GlobalKey _summarySectionKey = GlobalKey();
 
-  // Steps: 0=nothing, 1=address, 2=size, 3=brand, 4=orderType (complete)
-  static const int _totalSteps = 4;
+  // Steps: 0=nothing, 1=address, 2=size, 3=brand, 4=orderType, 5=payment (complete)
+  static const int _totalSteps = 5;
 
   int? _previousStep;
 
@@ -85,7 +92,10 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
       case 3: // Brand selected -> scroll to order type
         targetKey = _orderTypeSectionKey;
         break;
-      case 4: // Order type selected -> scroll to summary
+      case 4: // Order type selected -> scroll to payment
+        targetKey = _paymentSectionKey;
+        break;
+      case 5: // Payment selected -> scroll to summary
         targetKey = _summarySectionKey;
         break;
     }
@@ -217,6 +227,37 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
                   ),
                 ),
 
+                const SizedBox(height: AppSpacing.lg),
+
+                // Step 5: Payment method
+                Container(
+                  key: _paymentSectionKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(
+                        'Mode de paiement',
+                        isCompleted: widget.selectedPaymentMethod != null,
+                        stepNumber: 4,
+                        isEnabled: widget.selectedOrderType != null,
+                      ),
+                      _PaymentMethodSelector(
+                        selectedMethod: widget.selectedPaymentMethod,
+                        onChanged: widget.onPaymentMethodChanged,
+                        isEnabled: widget.selectedOrderType != null,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Delivery time estimation (show when payment selected)
+                if (widget.selectedPaymentMethod != null) ...[
+                  _DeliveryTimeInfo(depot: widget.depot),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+
                 // Extra space at bottom for scrolling
                 const SizedBox(height: AppSpacing.xl),
               ],
@@ -245,9 +286,10 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Summary info (show when order type is selected)
+                // Summary info (show when payment method is selected)
                 if (widget.selectedProduct != null &&
-                    widget.selectedOrderType != null) ...[
+                    widget.selectedOrderType != null &&
+                    widget.selectedPaymentMethod != null) ...[
                   _FloatingSummary(
                     depot: widget.depot!,
                     product: widget.selectedProduct!,
@@ -261,7 +303,9 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: widget.selectedProduct != null &&
-                            widget.selectedOrderType != null
+                            widget.selectedOrderType != null &&
+                            widget.selectedPaymentMethod != null &&
+                            !widget.isProcessing
                         ? widget.onOrder
                         : null,
                     style: ElevatedButton.styleFrom(
@@ -275,16 +319,26 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
                       ),
                       disabledBackgroundColor: AppColors.grey300,
                     ),
-                    child: Text(
-                      widget.selectedProduct != null &&
-                              widget.selectedOrderType != null
-                          ? 'Commander - ${widget.selectedProduct!.formatPrice(widget.selectedOrderType!)}'
-                          : 'Sélectionnez vos options',
-                      style: AppTypography.titleMedium.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: widget.isProcessing
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: AppColors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            widget.selectedProduct != null &&
+                                    widget.selectedOrderType != null &&
+                                    widget.selectedPaymentMethod != null
+                                ? 'Commander - ${widget.selectedProduct!.formatPrice(widget.selectedOrderType!)}'
+                                : 'Sélectionnez vos options',
+                            style: AppTypography.titleMedium.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -431,6 +485,8 @@ class _ProgressBar extends StatelessWidget {
       case 3:
         return 'Choisissez le type';
       case 4:
+        return 'Choisissez le paiement';
+      case 5:
         return 'Prêt à commander';
       default:
         return '';
@@ -922,6 +978,209 @@ class _FloatingSummary extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Payment method selector
+class _PaymentMethodSelector extends StatelessWidget {
+  const _PaymentMethodSelector({
+    required this.selectedMethod,
+    required this.onChanged,
+    required this.isEnabled,
+  });
+
+  final String? selectedMethod;
+  final ValueChanged<String> onChanged;
+  final bool isEnabled;
+
+  static const List<Map<String, dynamic>> _paymentMethods = [
+    {
+      'id': 'cash',
+      'name': 'Espèces',
+      'description': 'Payer à la livraison',
+      'icon': Icons.payments_outlined,
+    },
+    {
+      'id': 'wave',
+      'name': 'Wave',
+      'description': 'Paiement mobile',
+      'icon': Icons.phone_android,
+    },
+    {
+      'id': 'wallet',
+      'name': 'Portefeuille',
+      'description': 'Solde NELO',
+      'icon': Icons.account_balance_wallet,
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isEnabled) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.grey100,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Center(
+            child: Text(
+              'Sélectionnez d\'abord le type de commande',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.grey400,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Row(
+        children: _paymentMethods.map((method) {
+          final isSelected = method['id'] == selectedMethod;
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: method != _paymentMethods.last ? AppSpacing.sm : 0,
+              ),
+              child: GestureDetector(
+                onTap: () => onChanged(method['id'] as String),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.md,
+                    horizontal: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : AppColors.grey100,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primary : AppColors.grey200,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        method['icon'] as IconData,
+                        size: 24,
+                        color: isSelected ? AppColors.primary : AppColors.grey400,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        method['name'] as String,
+                        style: AppTypography.labelSmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        method['description'] as String,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+/// Delivery time info widget
+class _DeliveryTimeInfo extends StatelessWidget {
+  const _DeliveryTimeInfo({required this.depot});
+
+  final Provider? depot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.delivery_dining,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Livraison estimée',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    '30-45 minutes',
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Frais de livraison',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Text(
+                  '500 FCFA',
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
