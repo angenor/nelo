@@ -427,26 +427,6 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
             onTap: () => _selectAddress(address),
           );
         }),
-
-        const SizedBox(height: AppSpacing.md),
-
-        // Add new address button
-        OutlinedButton.icon(
-          onPressed: () {
-            // Focus on search field to add new address
-            _searchFocus.requestFocus();
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Ajouter une nouvelle adresse'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: BorderSide(color: AppColors.primary),
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            ),
-          ),
-        ),
       ],
     );
   }
