@@ -768,6 +768,191 @@ class MockData {
     ];
   }
 
+  /// Gas depots (filtered from allProviders)
+  static List<Provider> get gasDepots =>
+      allProviders.where((p) => p.type == ProviderType.gasDepot).toList();
+
+  /// Gas products for depot n1 (Dépôt Gaz Yao)
+  static const List<GasProduct> gasDepotN1Products = [
+    // Total brand
+    GasProduct(
+      id: 'gas1',
+      providerId: 'n1',
+      brand: GasBrand.total,
+      bottleSize: GasBottleSize.small,
+      refillPrice: 3500,
+      exchangePrice: 4000,
+      quantityAvailable: 15,
+    ),
+    GasProduct(
+      id: 'gas2',
+      providerId: 'n1',
+      brand: GasBrand.total,
+      bottleSize: GasBottleSize.medium,
+      refillPrice: 5500,
+      exchangePrice: 6500,
+      quantityAvailable: 20,
+    ),
+    GasProduct(
+      id: 'gas3',
+      providerId: 'n1',
+      brand: GasBrand.total,
+      bottleSize: GasBottleSize.large,
+      refillPrice: 18000,
+      exchangePrice: 22000,
+      quantityAvailable: 5,
+    ),
+    // Shell brand
+    GasProduct(
+      id: 'gas4',
+      providerId: 'n1',
+      brand: GasBrand.shell,
+      bottleSize: GasBottleSize.small,
+      refillPrice: 3600,
+      exchangePrice: 4200,
+      quantityAvailable: 10,
+    ),
+    GasProduct(
+      id: 'gas5',
+      providerId: 'n1',
+      brand: GasBrand.shell,
+      bottleSize: GasBottleSize.medium,
+      refillPrice: 5700,
+      exchangePrice: 6800,
+      quantityAvailable: 12,
+    ),
+  ];
+
+  /// Gas products for depot n5 (Dépôt Gaz Express)
+  static const List<GasProduct> gasDepotN5Products = [
+    // Oryx brand
+    GasProduct(
+      id: 'gas6',
+      providerId: 'n5',
+      brand: GasBrand.oryx,
+      bottleSize: GasBottleSize.small,
+      refillPrice: 3400,
+      exchangePrice: 3900,
+      quantityAvailable: 25,
+    ),
+    GasProduct(
+      id: 'gas7',
+      providerId: 'n5',
+      brand: GasBrand.oryx,
+      bottleSize: GasBottleSize.medium,
+      refillPrice: 5400,
+      exchangePrice: 6300,
+      quantityAvailable: 30,
+    ),
+    GasProduct(
+      id: 'gas8',
+      providerId: 'n5',
+      brand: GasBrand.oryx,
+      bottleSize: GasBottleSize.large,
+      refillPrice: 17500,
+      exchangePrice: 21000,
+      quantityAvailable: 8,
+    ),
+    // Total brand
+    GasProduct(
+      id: 'gas9',
+      providerId: 'n5',
+      brand: GasBrand.total,
+      bottleSize: GasBottleSize.medium,
+      refillPrice: 5500,
+      exchangePrice: 6500,
+      quantityAvailable: 15,
+    ),
+  ];
+
+  /// Get gas products for a provider
+  static List<GasProduct> getGasProductsForProvider(String providerId) {
+    switch (providerId) {
+      case 'n1':
+        return gasDepotN1Products;
+      case 'n5':
+        return gasDepotN5Products;
+      default:
+        // Default products for other gas depots
+        return [
+          GasProduct(
+            id: 'gas_default_1',
+            providerId: providerId,
+            brand: GasBrand.other,
+            bottleSize: GasBottleSize.small,
+            refillPrice: 3500,
+            exchangePrice: 4000,
+            quantityAvailable: 10,
+          ),
+          GasProduct(
+            id: 'gas_default_2',
+            providerId: providerId,
+            brand: GasBrand.other,
+            bottleSize: GasBottleSize.medium,
+            refillPrice: 5500,
+            exchangePrice: 6500,
+            quantityAvailable: 10,
+          ),
+        ];
+    }
+  }
+
+  /// Get available bottle sizes for a provider
+  static List<GasBottleSize> getAvailableSizesForProvider(String providerId) {
+    final products = getGasProductsForProvider(providerId);
+    return products.map((p) => p.bottleSize).toSet().toList()
+      ..sort((a, b) => a.kg.compareTo(b.kg));
+  }
+
+  /// Get available brands for a provider and size
+  static List<GasBrand> getAvailableBrandsForSize(
+      String providerId, GasBottleSize size) {
+    final products = getGasProductsForProvider(providerId);
+    return products
+        .where((p) => p.bottleSize == size)
+        .map((p) => p.brand)
+        .toSet()
+        .toList();
+  }
+
+  /// Get gas product by provider, size and brand
+  static GasProduct? getGasProduct(
+      String providerId, GasBottleSize size, GasBrand brand) {
+    final products = getGasProductsForProvider(providerId);
+    return products.cast<GasProduct?>().firstWhere(
+          (p) => p!.bottleSize == size && p.brand == brand,
+          orElse: () => null,
+        );
+  }
+
+  /// User saved addresses (mock)
+  static const List<Map<String, dynamic>> userAddresses = [
+    {
+      'id': 'addr1',
+      'label': 'Maison',
+      'address': 'Quartier Résidentiel, Tiassalé',
+      'latitude': 5.8980,
+      'longitude': -4.8225,
+      'isDefault': true,
+    },
+    {
+      'id': 'addr2',
+      'label': 'Bureau',
+      'address': 'Centre-ville, Tiassalé',
+      'latitude': 5.8975,
+      'longitude': -4.8220,
+      'isDefault': false,
+    },
+    {
+      'id': 'addr3',
+      'label': 'Chez Maman',
+      'address': 'Route de Divo, Tiassalé',
+      'latitude': 5.9000,
+      'longitude': -4.8250,
+      'isDefault': false,
+    },
+  ];
+
   /// Current promotions
   static final List<Promotion> promotions = [
     Promotion(

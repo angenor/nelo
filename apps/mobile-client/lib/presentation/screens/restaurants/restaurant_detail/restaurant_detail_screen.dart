@@ -32,10 +32,32 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   final List<CartItem> _cartItems = [];
   final _uuid = const Uuid();
 
+  // Scroll tracking for title visibility
+  final ScrollController _scrollController = ScrollController();
+  bool _showTitle = false;
+  static const double _collapsedThreshold = 180.0;
+
   @override
   void initState() {
     super.initState();
     _loadRestaurant();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final shouldShow = _scrollController.offset > _collapsedThreshold;
+    if (shouldShow != _showTitle) {
+      setState(() {
+        _showTitle = shouldShow;
+      });
+    }
   }
 
   void _loadRestaurant() {
@@ -179,6 +201,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // Header with cover image
           _buildSliverAppBar(),
@@ -227,6 +250,19 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       pinned: true,
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.textPrimary,
+      title: AnimatedOpacity(
+        opacity: _showTitle ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        child: Text(
+          _restaurant.name,
+          style: AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
       leading: Padding(
         padding: const EdgeInsets.all(AppSpacing.xs),
         child: CircleAvatar(

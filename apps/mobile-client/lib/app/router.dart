@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/entities/entities.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/otp_verification_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
+import '../presentation/screens/gas/gas_order_screen.dart';
+import '../presentation/screens/gas/gas_confirmation_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
@@ -27,6 +30,7 @@ class AppRoutes {
   static const String restaurants = '/restaurants';
   static const String restaurantDetail = '/restaurants/:id';
   static const String gas = '/gas';
+  static const String gasConfirm = '/gas/confirm';
   static const String errands = '/errands';
   static const String parcel = '/parcel';
 
@@ -239,13 +243,24 @@ class AppRouter {
         path: AppRoutes.gas,
         name: 'gas',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const _ServicePlaceholderScreen(
-              title: 'Commander du Gaz',
-              icon: Icons.local_fire_department,
-              color: Color(0xFFFF9500),
-              description: 'Carte + selection depot + bouteille',
-            ),
+        builder: (context, state) => const GasOrderScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.gasConfirm,
+        name: 'gasConfirm',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          if (extra == null) {
+            return const _PlaceholderScreen(title: 'Erreur');
+          }
+          return GasConfirmationScreen(
+            depot: extra['depot'] as Provider,
+            product: extra['product'] as GasProduct,
+            orderType: extra['orderType'] as GasOrderType,
+            address: extra['address'] as Map<String, dynamic>,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.errands,

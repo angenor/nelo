@@ -252,18 +252,18 @@ apps/mobile-client/
 ```
 
 **Fonctionnalites:**
-- [ ] Carte avec depots gaz (`providers` WHERE type='gas_depot')
-- [ ] Detection position actuelle (geolocalisation)
-- [ ] Selection automatique du depot le plus proche
-- [ ] Possibilite de changer de depot en cliquant sur la carte
-- [ ] Bottom sheet draggable (collapsed/expanded)
-- [ ] Selection adresse livraison (dropdown adresses favorites)
-- [ ] Selection taille bouteille (`gas_products.bottle_size`)
-- [ ] Selection marque si plusieurs disponibles (`gas_products.brand`)
-- [ ] Toggle Recharge/Echange (`refill_price` vs `exchange_price`)
-- [ ] Affichage prix dynamique
-- [ ] Affichage stock disponible (`quantity_available`)
-- [ ] Bouton commander
+- [x] Carte avec depots gaz (`providers` WHERE type='gas_depot')
+- [x] Detection position actuelle (geolocalisation)
+- [x] Selection automatique du depot le plus proche
+- [x] Possibilite de changer de depot en cliquant sur la carte
+- [x] Bottom sheet draggable (collapsed/expanded)
+- [x] Selection adresse livraison (dropdown adresses favorites)
+- [x] Selection taille bouteille (`gas_products.bottle_size`)
+- [x] Selection marque si plusieurs disponibles (`gas_products.brand`)
+- [x] Toggle Recharge/Echange (`refill_price` vs `exchange_price`)
+- [x] Affichage prix dynamique
+- [x] Affichage stock disponible (`quantity_available`)
+- [x] Bouton commander
 
 **Donnees schema.sql:**
 ```sql
@@ -272,11 +272,11 @@ orders.providers: type='gas_depot', location, is_open
 ```
 
 #### 4.2 Confirmation Gaz
-- [ ] Resume commande (type, taille, prix)
-- [ ] Adresse de livraison
-- [ ] Mode de paiement
-- [ ] Estimation temps livraison
-- [ ] Bouton confirmer
+- [x] Resume commande (type, taille, prix)
+- [x] Adresse de livraison
+- [x] Mode de paiement
+- [x] Estimation temps livraison
+- [x] Bouton confirmer
 
 ---
 
