@@ -200,7 +200,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                                       onFavoriteTap: () =>
                                           _toggleFavorite(restaurant.id),
                                       onTap: () {
-                                        context.push('/provider/${restaurant.id}');
+                                        context.push('/restaurants/${restaurant.id}');
                                       },
                                     ),
                                   );

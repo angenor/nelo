@@ -7,6 +7,7 @@ import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
 import '../presentation/screens/restaurants/restaurants_screen.dart';
+import '../presentation/screens/restaurants/restaurant_detail/restaurant_detail_screen.dart';
 import '../presentation/screens/search/search_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
 
@@ -24,6 +25,7 @@ class AppRoutes {
 
   // MVP Service routes
   static const String restaurants = '/restaurants';
+  static const String restaurantDetail = '/restaurants/:id';
   static const String gas = '/gas';
   static const String errands = '/errands';
   static const String parcel = '/parcel';
@@ -223,6 +225,15 @@ class AppRouter {
         name: 'restaurants',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const RestaurantsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.restaurantDetail,
+        name: 'restaurantDetail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return RestaurantDetailScreen(restaurantId: id);
+        },
       ),
       GoRoute(
         path: AppRoutes.gas,

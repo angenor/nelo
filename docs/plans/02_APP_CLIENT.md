@@ -173,11 +173,11 @@ apps/mobile-client/
 - [x] Indicateur ouvert/ferme (`is_open`)
 
 #### 3.2 Detail Restaurant
-- [ ] Header (cover_image_url, logo_url, name, average_rating)
-- [ ] Infos (horaires via `provider_schedules`, adresse, telephone)
-- [ ] Menu par categories (`product_categories`)
-- [ ] Liste produits avec prix (`products`)
-- [ ] Bouton panier flottant avec total
+- [x] Header (cover_image_url, logo_url, name, average_rating)
+- [x] Infos (horaires via `provider_schedules`, adresse, telephone)
+- [x] Menu par categories (`product_categories`)
+- [x] Liste produits avec prix (`products`)
+- [x] Bouton panier flottant avec total
 
 #### 3.3 Detail Produit
 - [ ] Image, nom, description

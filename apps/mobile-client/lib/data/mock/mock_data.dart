@@ -423,6 +423,259 @@ class MockData {
     'Gaz 12kg',
   ];
 
+  /// Provider schedules (for restaurant p1 - Chez Tantine Marie)
+  static const List<ProviderSchedule> restaurantP1Schedules = [
+    ProviderSchedule(id: 'sch1', providerId: 'p1', dayOfWeek: 0, openTime: '08:00', closeTime: '22:00'),
+    ProviderSchedule(id: 'sch2', providerId: 'p1', dayOfWeek: 1, openTime: '08:00', closeTime: '22:00'),
+    ProviderSchedule(id: 'sch3', providerId: 'p1', dayOfWeek: 2, openTime: '08:00', closeTime: '22:00'),
+    ProviderSchedule(id: 'sch4', providerId: 'p1', dayOfWeek: 3, openTime: '08:00', closeTime: '22:00'),
+    ProviderSchedule(id: 'sch5', providerId: 'p1', dayOfWeek: 4, openTime: '08:00', closeTime: '23:00'),
+    ProviderSchedule(id: 'sch6', providerId: 'p1', dayOfWeek: 5, openTime: '10:00', closeTime: '23:00'),
+    ProviderSchedule(id: 'sch7', providerId: 'p1', dayOfWeek: 6, openTime: '10:00', closeTime: '21:00'),
+  ];
+
+  /// Menu categories for restaurant p1 - Chez Tantine Marie
+  static const List<MenuCategory> restaurantP1Menu = [
+    MenuCategory(
+      id: 'cat1',
+      providerId: 'p1',
+      name: 'Plats populaires',
+      displayOrder: 0,
+      products: [
+        Product(
+          id: 'prod1',
+          providerId: 'p1',
+          categoryId: 'cat1',
+          name: 'Poulet braisé + Attiéké',
+          description: 'Poulet braisé mariné aux épices locales, servi avec attiéké frais et piment',
+          imageUrl: 'https://picsum.photos/seed/poulet1/300/200',
+          price: 2500,
+          isFeatured: true,
+          prepTime: 25,
+        ),
+        Product(
+          id: 'prod2',
+          providerId: 'p1',
+          categoryId: 'cat1',
+          name: 'Poisson braisé + Alloco',
+          description: 'Poisson frais braisé au charbon, servi avec bananes plantains frites',
+          imageUrl: 'https://picsum.photos/seed/poisson1/300/200',
+          price: 3000,
+          isFeatured: true,
+          prepTime: 30,
+        ),
+        Product(
+          id: 'prod3',
+          providerId: 'p1',
+          categoryId: 'cat1',
+          name: 'Garba',
+          description: 'Attiéké garba avec thon frit, oignons et piment frais',
+          imageUrl: 'https://picsum.photos/seed/garba/300/200',
+          price: 1000,
+          isFeatured: true,
+          prepTime: 10,
+        ),
+      ],
+    ),
+    MenuCategory(
+      id: 'cat2',
+      providerId: 'p1',
+      name: 'Entrées',
+      displayOrder: 1,
+      products: [
+        Product(
+          id: 'prod4',
+          providerId: 'p1',
+          categoryId: 'cat2',
+          name: 'Salade africaine',
+          description: 'Salade fraîche avec avocat, tomates et vinaigrette maison',
+          imageUrl: 'https://picsum.photos/seed/salade/300/200',
+          price: 1500,
+          isVegetarian: true,
+          prepTime: 10,
+        ),
+        Product(
+          id: 'prod5',
+          providerId: 'p1',
+          categoryId: 'cat2',
+          name: 'Brochettes de boeuf',
+          description: '4 brochettes de boeuf marinées et grillées',
+          imageUrl: 'https://picsum.photos/seed/brochette/300/200',
+          price: 2000,
+          prepTime: 15,
+        ),
+      ],
+    ),
+    MenuCategory(
+      id: 'cat3',
+      providerId: 'p1',
+      name: 'Plats principaux',
+      displayOrder: 2,
+      products: [
+        Product(
+          id: 'prod6',
+          providerId: 'p1',
+          categoryId: 'cat3',
+          name: 'Foutou banane + Sauce graine',
+          description: 'Foutou de banane plantain avec sauce graine de palme et viande',
+          imageUrl: 'https://picsum.photos/seed/foutou/300/200',
+          price: 3500,
+          prepTime: 35,
+        ),
+        Product(
+          id: 'prod7',
+          providerId: 'p1',
+          categoryId: 'cat3',
+          name: 'Riz sauce arachide + Poulet',
+          description: 'Riz blanc avec sauce arachide maison et morceau de poulet',
+          imageUrl: 'https://picsum.photos/seed/riz/300/200',
+          price: 2500,
+          prepTime: 25,
+        ),
+        Product(
+          id: 'prod8',
+          providerId: 'p1',
+          categoryId: 'cat3',
+          name: 'Kedjenou de poulet',
+          description: 'Poulet mijoté à l\'étouffée avec légumes et épices',
+          imageUrl: 'https://picsum.photos/seed/kedjenou/300/200',
+          price: 4000,
+          isSpicy: true,
+          prepTime: 40,
+        ),
+        Product(
+          id: 'prod9',
+          providerId: 'p1',
+          categoryId: 'cat3',
+          name: 'Tiep bou dien',
+          description: 'Riz au poisson sénégalais avec légumes',
+          imageUrl: 'https://picsum.photos/seed/tiep/300/200',
+          price: 3500,
+          prepTime: 35,
+        ),
+      ],
+    ),
+    MenuCategory(
+      id: 'cat4',
+      providerId: 'p1',
+      name: 'Boissons',
+      displayOrder: 3,
+      products: [
+        Product(
+          id: 'prod10',
+          providerId: 'p1',
+          categoryId: 'cat4',
+          name: 'Bissap',
+          description: 'Jus d\'hibiscus frais fait maison',
+          imageUrl: 'https://picsum.photos/seed/bissap/300/200',
+          price: 500,
+          isVegetarian: true,
+          prepTime: 2,
+        ),
+        Product(
+          id: 'prod11',
+          providerId: 'p1',
+          categoryId: 'cat4',
+          name: 'Gingembre',
+          description: 'Jus de gingembre frais épicé',
+          imageUrl: 'https://picsum.photos/seed/ginger/300/200',
+          price: 500,
+          isVegetarian: true,
+          isSpicy: true,
+          prepTime: 2,
+        ),
+        Product(
+          id: 'prod12',
+          providerId: 'p1',
+          categoryId: 'cat4',
+          name: 'Coca-Cola',
+          description: 'Bouteille 50cl',
+          imageUrl: 'https://picsum.photos/seed/coca/300/200',
+          price: 500,
+          isVegetarian: true,
+          prepTime: 1,
+        ),
+        Product(
+          id: 'prod13',
+          providerId: 'p1',
+          categoryId: 'cat4',
+          name: 'Eau minerale',
+          description: 'Bouteille 1.5L',
+          imageUrl: 'https://picsum.photos/seed/water/300/200',
+          price: 500,
+          isVegetarian: true,
+          prepTime: 1,
+        ),
+      ],
+    ),
+    MenuCategory(
+      id: 'cat5',
+      providerId: 'p1',
+      name: 'Desserts',
+      displayOrder: 4,
+      products: [
+        Product(
+          id: 'prod14',
+          providerId: 'p1',
+          categoryId: 'cat5',
+          name: 'Fruits frais',
+          description: 'Assiette de fruits de saison (mangue, ananas, papaye)',
+          imageUrl: 'https://picsum.photos/seed/fruits/300/200',
+          price: 1000,
+          isVegetarian: true,
+          prepTime: 5,
+        ),
+        Product(
+          id: 'prod15',
+          providerId: 'p1',
+          categoryId: 'cat5',
+          name: 'Dêguê',
+          description: 'Bouillie de mil au lait caillé sucré',
+          imageUrl: 'https://picsum.photos/seed/degue/300/200',
+          price: 800,
+          isVegetarian: true,
+          prepTime: 5,
+        ),
+      ],
+    ),
+  ];
+
+  /// Get schedules for a provider
+  static List<ProviderSchedule> getSchedulesForProvider(String providerId) {
+    if (providerId == 'p1') return restaurantP1Schedules;
+    // Default schedules for other providers
+    return List.generate(7, (index) => ProviderSchedule(
+      id: 'sch_${providerId}_$index',
+      providerId: providerId,
+      dayOfWeek: index,
+      openTime: '08:00',
+      closeTime: '21:00',
+    ));
+  }
+
+  /// Get menu for a provider
+  static List<MenuCategory> getMenuForProvider(String providerId) {
+    if (providerId == 'p1') return restaurantP1Menu;
+    // Default menu for other providers
+    return [
+      MenuCategory(
+        id: 'default_cat',
+        providerId: providerId,
+        name: 'Menu',
+        products: [
+          Product(
+            id: 'default_prod1',
+            providerId: providerId,
+            name: 'Plat du jour',
+            description: 'Notre spécialité du jour',
+            imageUrl: 'https://picsum.photos/seed/$providerId/300/200',
+            price: 2500,
+          ),
+        ],
+      ),
+    ];
+  }
+
   /// Current promotions
   static final List<Promotion> promotions = [
     Promotion(
