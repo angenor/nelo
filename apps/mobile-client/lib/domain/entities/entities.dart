@@ -1,4 +1,5 @@
 // Domain entities barrel file
+export 'cart_item.dart';
 export 'cuisine_type.dart';
 export 'menu_category.dart';
 export 'product.dart';

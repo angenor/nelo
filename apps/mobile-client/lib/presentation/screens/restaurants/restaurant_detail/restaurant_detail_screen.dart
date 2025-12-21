@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../data/mock/mock_data.dart';
 import '../../../../domain/entities/entities.dart';
+import '../../cart/cart_screen.dart';
 import 'widgets/restaurant_info_section.dart';
 import 'widgets/menu_category_section.dart';
 import 'widgets/floating_cart_button.dart';
@@ -26,8 +28,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   late List<MenuCategory> _menuCategories;
   late List<ProviderSchedule> _schedules;
 
-  // Cart state (simplified for now)
-  final Map<String, int> _cartItems = {};
+  // Cart state with full CartItem objects
+  final List<CartItem> _cartItems = [];
+  final _uuid = const Uuid();
 
   @override
   void initState() {
@@ -45,9 +48,36 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     _schedules = MockData.getSchedulesForProvider(widget.restaurantId);
   }
 
+  /// Get quantity map for display in menu (product.id -> total quantity)
+  Map<String, int> get _cartQuantityMap {
+    final map = <String, int>{};
+    for (final item in _cartItems) {
+      map[item.product.id] = (map[item.product.id] ?? 0) + item.quantity;
+    }
+    return map;
+  }
+
   void _addToCart(Product product) {
     setState(() {
-      _cartItems[product.id] = (_cartItems[product.id] ?? 0) + 1;
+      // Check if same product without options already exists
+      final existingIndex = _cartItems.indexWhere(
+        (item) => item.product.id == product.id && item.selectedOptions.isEmpty,
+      );
+
+      if (existingIndex >= 0) {
+        // Update quantity of existing item
+        final existing = _cartItems[existingIndex];
+        _cartItems[existingIndex] = existing.copyWith(
+          quantity: existing.quantity + 1,
+        );
+      } else {
+        // Add new item
+        _cartItems.add(CartItem(
+          id: _uuid.v4(),
+          product: product,
+          quantity: 1,
+        ));
+      }
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -62,18 +92,31 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   void _removeFromCart(Product product) {
     setState(() {
-      final current = _cartItems[product.id] ?? 0;
-      if (current > 1) {
-        _cartItems[product.id] = current - 1;
-      } else {
-        _cartItems.remove(product.id);
+      // Find item for this product (prefer items without options first)
+      final index = _cartItems.indexWhere(
+        (item) => item.product.id == product.id,
+      );
+
+      if (index >= 0) {
+        final item = _cartItems[index];
+        if (item.quantity > 1) {
+          _cartItems[index] = item.copyWith(quantity: item.quantity - 1);
+        } else {
+          _cartItems.removeAt(index);
+        }
       }
     });
   }
 
   void _addWithOptions(Product product, int quantity, Map<String, List<String>> selectedOptions) {
     setState(() {
-      _cartItems[product.id] = (_cartItems[product.id] ?? 0) + quantity;
+      // Always add as new item when options are selected (each combination is unique)
+      _cartItems.add(CartItem(
+        id: _uuid.v4(),
+        product: product,
+        quantity: quantity,
+        selectedOptions: selectedOptions,
+      ));
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -86,18 +129,50 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     );
   }
 
-  int get _cartItemCount => _cartItems.values.fold(0, (a, b) => a + b);
-
-  int get _cartTotal {
-    int total = 0;
-    for (final category in _menuCategories) {
-      for (final product in category.products) {
-        if (_cartItems.containsKey(product.id)) {
-          total += product.price * _cartItems[product.id]!;
+  void _updateCartItemQuantity(CartItem item, int newQuantity) {
+    setState(() {
+      final index = _cartItems.indexWhere((i) => i.id == item.id);
+      if (index >= 0) {
+        if (newQuantity > 0) {
+          _cartItems[index] = item.copyWith(quantity: newQuantity);
+        } else {
+          _cartItems.removeAt(index);
         }
       }
-    }
-    return total;
+    });
+  }
+
+  void _removeCartItem(CartItem item) {
+    setState(() {
+      _cartItems.removeWhere((i) => i.id == item.id);
+    });
+  }
+
+  int get _cartItemCount => _cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+  int get _cartTotal => _cartItems.fold(0, (sum, item) => sum + item.totalPrice);
+
+  void _openCart() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CartScreen(
+          restaurantName: _restaurant.name,
+          items: List.from(_cartItems),
+          onUpdateQuantity: _updateCartItemQuantity,
+          onRemoveItem: _removeCartItem,
+          onCheckout: (instructions) {
+            // TODO: Navigate to checkout
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Redirection vers le paiement...'),
+                backgroundColor: AppColors.primary,
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -120,7 +195,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ..._menuCategories.map((category) => SliverToBoxAdapter(
             child: MenuCategorySection(
               category: category,
-              cartItems: _cartItems,
+              cartItems: _cartQuantityMap,
               onAddToCart: _addToCart,
               onRemoveFromCart: _removeFromCart,
               onAddWithOptions: _addWithOptions,
@@ -139,10 +214,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ? FloatingCartButton(
               itemCount: _cartItemCount,
               total: _cartTotal,
-              onPressed: () {
-                // Navigate to cart
-                context.push('/cart');
-              },
+              onPressed: _openCart,
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

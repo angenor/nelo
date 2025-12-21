@@ -43,6 +43,7 @@ dependencies:
   # Utils
   intl: ^0.18.1
   dartz: ^0.10.1
+  uuid: ^4.2.1
 
   # Icons
   cupertino_icons: ^1.0.8

@@ -180,18 +180,18 @@ apps/mobile-client/
 - [x] Bouton panier flottant avec total
 
 #### 3.3 Detail Produit
-- [ ] Image, nom, description
-- [ ] Options/Variations (`product_options`, `product_option_items`)
-- [ ] Prix avec ajustements
-- [ ] Selecteur quantite
-- [ ] Bouton ajouter au panier
+- [x] Image, nom, description
+- [x] Options/Variations (`product_options`, `product_option_items`)
+- [x] Prix avec ajustements
+- [x] Selecteur quantite
+- [x] Bouton ajouter au panier
 
 #### 3.4 Panier Restaurant
-- [ ] Liste articles avec options selectionnees
-- [ ] Modification quantite / suppression
-- [ ] Sous-total, frais livraison, total
-- [ ] Champ instructions speciales
-- [ ] Bouton "Commander"
+- [x] Liste articles avec options selectionnees
+- [x] Modification quantite / suppression
+- [x] Sous-total, frais livraison, total
+- [x] Champ instructions speciales
+- [x] Bouton "Commander"
 
 ---
 

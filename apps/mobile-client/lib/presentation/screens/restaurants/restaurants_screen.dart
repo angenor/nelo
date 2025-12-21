@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../../domain/entities/entities.dart';
-import '../home/widgets/home_header.dart';
 import 'widgets/widgets.dart';
 
 /// Restaurant listing screen with visual filters
@@ -24,10 +23,32 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   // Favorites (local state for now)
   final Set<String> _favoriteIds = {};
 
+  // Scroll tracking for header title
+  final ScrollController _scrollController = ScrollController();
+  bool _showTitleInHeader = false;
+  static const double _titleScrollThreshold = 50.0;
+
   @override
   void initState() {
     super.initState();
     _loadRestaurants();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final shouldShow = _scrollController.offset > _titleScrollThreshold;
+    if (shouldShow != _showTitleInHeader) {
+      setState(() {
+        _showTitleInHeader = shouldShow;
+      });
+    }
   }
 
   void _loadRestaurants() {
@@ -76,6 +97,99 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     });
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Back button
+          IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back),
+            color: AppColors.textPrimary,
+          ),
+
+          // Title or Location info (animated transition)
+          Expanded(
+            child: AnimatedCrossFade(
+              duration: const Duration(milliseconds: 200),
+              crossFadeState: _showTitleInHeader
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              firstChild: Text(
+                'Restaurants',
+                style: AppTypography.titleMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              secondChild: GestureDetector(
+                onTap: () {
+                  // TODO: Open location picker
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Livrer à',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            'Tiassalé, Centre-ville',
+                            style: AppTypography.labelMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Notifications
+          IconButton(
+            onPressed: () => context.push('/notifications'),
+            icon: const Icon(Icons.notifications_outlined),
+            color: AppColors.textPrimary,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,16 +197,8 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header with delivery address (stays fixed)
-            HomeHeader(
-              location: 'Tiassale, Centre-ville',
-              onLocationTap: () {
-                // TODO: Open location picker
-              },
-              onNotificationTap: () {
-                context.push('/notifications');
-              },
-            ),
+            // Header with back button
+            _buildHeader(context),
 
             // Scrollable content
             Expanded(
@@ -101,6 +207,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                       child: CircularProgressIndicator(color: AppColors.primary),
                     )
                   : CustomScrollView(
+                      controller: _scrollController,
                       slivers: [
                         // Page title
                         SliverToBoxAdapter(

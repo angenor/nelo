@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/theme.dart';
 import '../../../../../domain/entities/entities.dart';
+import '../product_detail_screen.dart';
 import 'product_options_sheet.dart';
 
 /// Menu category section with products
@@ -44,6 +45,7 @@ class MenuCategorySection extends StatelessWidget {
         ...category.products.map((product) => _ProductCard(
               product: product,
               quantity: cartItems[product.id] ?? 0,
+              onTap: () => _openProductDetail(context, product),
               onAddToCart: () {
                 if (product.hasOptions) {
                   _showOptionsSheet(context, product);
@@ -56,6 +58,17 @@ class MenuCategorySection extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.sm),
       ],
+    );
+  }
+
+  void _openProductDetail(BuildContext context, Product product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(
+          product: product,
+          onAddToCart: onAddWithOptions,
+        ),
+      ),
     );
   }
 
@@ -81,12 +94,14 @@ class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.quantity,
+    required this.onTap,
     required this.onAddToCart,
     required this.onRemoveFromCart,
   });
 
   final Product product;
   final int quantity;
+  final VoidCallback onTap;
   final VoidCallback onAddToCart;
   final VoidCallback onRemoveFromCart;
 
@@ -103,9 +118,7 @@ class _ProductCard extends StatelessWidget {
         border: Border.all(color: AppColors.grey200),
       ),
       child: InkWell(
-        onTap: () {
-          // Navigate to product detail
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
