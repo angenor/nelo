@@ -103,6 +103,8 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -117,9 +119,7 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
           ),
         ],
       ),
-      child: ListView(
-        controller: widget.scrollController,
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
           // Drag handle
           Center(
@@ -141,94 +141,124 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
 
           const SizedBox(height: AppSpacing.md),
 
-          // Step 1: Delivery address
-          _buildSectionTitle('Livrer à', isCompleted: widget.selectedAddress != null),
-          _AddressSelector(
-            addresses: widget.addresses,
-            selectedAddress: widget.selectedAddress,
-            onChanged: widget.onAddressChanged,
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Step 2: Bottle size
-          _buildSectionTitle(
-            'Taille de bouteille',
-            isCompleted: widget.selectedSize != null,
-            stepNumber: 1,
-          ),
-          _BottleSizeSelector(
-            sizes: widget.availableSizes,
-            selectedSize: widget.selectedSize,
-            onChanged: widget.onSizeChanged,
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Step 3: Brand
-          Container(
-            key: _brandSectionKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Scrollable content
+          Expanded(
+            child: ListView(
+              controller: widget.scrollController,
+              padding: EdgeInsets.zero,
               children: [
+                // Step 1: Delivery address
                 _buildSectionTitle(
-                  'Marque',
-                  isCompleted: widget.selectedBrand != null,
-                  stepNumber: 2,
-                  isEnabled: widget.selectedSize != null,
+                    'Livrer à', isCompleted: widget.selectedAddress != null),
+                _AddressSelector(
+                  addresses: widget.addresses,
+                  selectedAddress: widget.selectedAddress,
+                  onChanged: widget.onAddressChanged,
                 ),
-                _BrandSelector(
-                  brands: widget.availableBrands,
-                  selectedBrand: widget.selectedBrand,
-                  onChanged: widget.onBrandChanged,
-                  isEnabled: widget.selectedSize != null,
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Step 2: Bottle size
+                _buildSectionTitle(
+                  'Taille de bouteille',
+                  isCompleted: widget.selectedSize != null,
+                  stepNumber: 1,
                 ),
+                _BottleSizeSelector(
+                  sizes: widget.availableSizes,
+                  selectedSize: widget.selectedSize,
+                  onChanged: widget.onSizeChanged,
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Step 3: Brand
+                Container(
+                  key: _brandSectionKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(
+                        'Marque',
+                        isCompleted: widget.selectedBrand != null,
+                        stepNumber: 2,
+                        isEnabled: widget.selectedSize != null,
+                      ),
+                      _BrandSelector(
+                        brands: widget.availableBrands,
+                        selectedBrand: widget.selectedBrand,
+                        onChanged: widget.onBrandChanged,
+                        isEnabled: widget.selectedSize != null,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Step 4: Order type
+                Container(
+                  key: _orderTypeSectionKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(
+                        'Type de commande',
+                        isCompleted: widget.selectedOrderType != null,
+                        stepNumber: 3,
+                        isEnabled: widget.selectedBrand != null,
+                      ),
+                      _OrderTypeSelector(
+                        selectedOrderType: widget.selectedOrderType,
+                        onChanged: widget.onOrderTypeChanged,
+                        isEnabled: widget.selectedBrand != null,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Extra space at bottom for scrolling
+                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),
 
-          const SizedBox(height: AppSpacing.lg),
-
-          // Step 4: Order type
-          Container(
-            key: _orderTypeSectionKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle(
-                  'Type de commande',
-                  isCompleted: widget.selectedOrderType != null,
-                  stepNumber: 3,
-                  isEnabled: widget.selectedBrand != null,
-                ),
-                _OrderTypeSelector(
-                  selectedOrderType: widget.selectedOrderType,
-                  onChanged: widget.onOrderTypeChanged,
-                  isEnabled: widget.selectedBrand != null,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Summary
+          // Fixed bottom section - Summary + Order button
           Container(
             key: _summarySectionKey,
-            child: Column(
-              children: [
-                const Divider(height: AppSpacing.md),
-                const SizedBox(height: AppSpacing.sm),
-                _OrderSummary(
-                  depot: widget.depot,
-                  product: widget.selectedProduct,
-                  orderType: widget.selectedOrderType,
-                  isComplete: widget.selectedOrderType != null,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
                 ),
-                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              bottomPadding + AppSpacing.md,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Summary info (show when order type is selected)
+                if (widget.selectedProduct != null &&
+                    widget.selectedOrderType != null) ...[
+                  _FloatingSummary(
+                    depot: widget.depot!,
+                    product: widget.selectedProduct!,
+                    orderType: widget.selectedOrderType!,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+
                 // Order button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: widget.selectedProduct != null &&
                             widget.selectedOrderType != null
@@ -237,14 +267,19 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMd),
                       ),
                       disabledBackgroundColor: AppColors.grey300,
                     ),
                     child: Text(
-                      'Commander maintenant',
+                      widget.selectedProduct != null &&
+                              widget.selectedOrderType != null
+                          ? 'Commander - ${widget.selectedProduct!.formatPrice(widget.selectedOrderType!)}'
+                          : 'Sélectionnez vos options',
                       style: AppTypography.titleMedium.copyWith(
                         color: AppColors.white,
                         fontWeight: FontWeight.bold,
@@ -255,8 +290,6 @@ class _GasOrderSheetState extends State<GasOrderSheet> {
               ],
             ),
           ),
-
-          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.xl),
         ],
       ),
     );
@@ -788,146 +821,107 @@ class _OrderTypeSelector extends StatelessWidget {
   }
 }
 
-/// Order summary section
-class _OrderSummary extends StatelessWidget {
-  const _OrderSummary({
+/// Floating summary section (fixed at bottom)
+class _FloatingSummary extends StatelessWidget {
+  const _FloatingSummary({
     required this.depot,
     required this.product,
     required this.orderType,
-    required this.isComplete,
   });
 
-  final Provider? depot;
-  final GasProduct? product;
-  final GasOrderType? orderType;
-  final bool isComplete;
+  final Provider depot;
+  final GasProduct product;
+  final GasOrderType orderType;
 
   @override
   Widget build(BuildContext context) {
-    if (!isComplete || product == null || depot == null || orderType == null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.grey100,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Row(
+        children: [
+          // Gas icon
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF9500).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: const Icon(
+              Icons.propane_tank,
+              color: Color(0xFFFF9500),
+              size: 24,
+            ),
           ),
-          child: Center(
+          const SizedBox(width: AppSpacing.sm),
+
+          // Product info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${product.brand.name} ${product.bottleSize.kg}kg - ${orderType.label}',
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.store,
+                      size: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '${depot.name} • ${depot.distanceText}',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Stock badge
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: product.quantityAvailable > 5
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
             child: Text(
-              'Complétez les étapes ci-dessus',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.grey400,
+              '${product.quantityAvailable} dispo',
+              style: AppTypography.labelSmall.copyWith(
+                color: product.quantityAvailable > 5
+                    ? AppColors.success
+                    : AppColors.error,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
               ),
             ),
           ),
-        ),
-      );
-    }
-
-    final formattedPrice = product!.formatPrice(orderType!);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Price
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Prix',
-                  style: AppTypography.bodyMedium,
-                ),
-                Text(
-                  formattedPrice,
-                  style: AppTypography.headlineSmall.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-
-            // Depot info
-            Row(
-              children: [
-                Icon(
-                  Icons.store,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    depot!.name,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-                Text(
-                  depot!.distanceText,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // Stock info
-            Row(
-              children: [
-                Icon(
-                  Icons.inventory_2,
-                  size: 16,
-                  color: product!.quantityAvailable > 5
-                      ? AppColors.success
-                      : AppColors.error,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '${product!.quantityAvailable} en stock',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: product!.quantityAvailable > 5
-                        ? AppColors.success
-                        : AppColors.error,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // Delivery info
-            Row(
-              children: [
-                Icon(
-                  Icons.delivery_dining,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  'Livreur auto-assigné',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

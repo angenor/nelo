@@ -31,9 +31,9 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
 
   // Sheet sizes for each step
   // Initial size shows address + bottle size sections together
-  static const double _initialSize = 0.42;
-  static const double _stepBrandSize = 0.52;
-  static const double _stepOrderTypeSize = 0.65;
+  static const double _initialSize = 0.50;
+  static const double _stepBrandSize = 0.60;
+  static const double _stepOrderTypeSize = 0.70;
   static const double _stepSummarySize = 0.85;
 
   @override
@@ -218,11 +218,10 @@ class _GasOrderScreenState extends State<GasOrderScreen> {
           DraggableScrollableSheet(
             controller: _sheetController,
             initialChildSize: _initialSize,
-            minChildSize: 0.25,
+            minChildSize: _initialSize,
             maxChildSize: 0.90,
             snap: true,
             snapSizes: [
-              0.25,
               _initialSize,
               _stepBrandSize,
               _stepOrderTypeSize,
