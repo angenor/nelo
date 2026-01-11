@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
+import '../../common/map_location_picker.dart';
 
 /// Bottom sheet for address selection with autocomplete
 class AddressPickerSheet extends StatefulWidget {
@@ -146,6 +147,19 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
   void _selectAddress(Map<String, dynamic> address) {
     Navigator.of(context).pop();
     widget.onAddressSelected(address);
+  }
+
+  void _openMapPicker() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MapLocationPicker(
+          onLocationSelected: (address) {
+            Navigator.of(context).pop(); // Close the address picker sheet
+            widget.onAddressSelected(address);
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -310,6 +324,67 @@ class _AddressPickerSheetState extends State<AddressPickerSheet> {
                       Icon(
                         Icons.chevron_right,
                         color: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+
+            // Choose on map button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: InkWell(
+                onTap: _openMapPicker,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.grey100,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    border: Border.all(
+                      color: AppColors.grey300,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.textSecondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.map_outlined,
+                          color: AppColors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Choisir sur la carte',
+                              style: AppTypography.labelMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Sélectionner un point précis',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: AppColors.textSecondary,
                       ),
                     ],
                   ),

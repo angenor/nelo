@@ -6,6 +6,7 @@ import '../presentation/screens/auth/otp_verification_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/gas/gas_order_screen.dart';
 import '../presentation/screens/gas/gas_confirmation_screen.dart';
+import '../presentation/screens/errands/errands_order_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
@@ -266,13 +267,7 @@ class AppRouter {
         path: AppRoutes.errands,
         name: 'errands',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const _ServicePlaceholderScreen(
-              title: 'Faire mes courses',
-              icon: Icons.shopping_basket,
-              color: Color(0xFF34C759),
-              description: 'Carte + liste de courses + note vocale',
-            ),
+        builder: (context, state) => const ErrandsOrderScreen(),
       ),
       GoRoute(
         path: AppRoutes.parcel,

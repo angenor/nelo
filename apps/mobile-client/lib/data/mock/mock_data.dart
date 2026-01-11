@@ -423,6 +423,30 @@ class MockData {
     'Gaz 12kg',
   ];
 
+  /// Grocery suggestions for errands service
+  static const List<String> grocerySuggestions = [
+    'Riz',
+    'Huile',
+    'Sel',
+    'Sucre',
+    'Tomates',
+    'Oignons',
+    'Poulet',
+    'Poisson',
+    'Attiéké',
+    'Pain',
+    'Lait',
+    'Oeufs',
+    'Savon',
+    'Eau minérale',
+    'Piment',
+    'Cube Maggi',
+    'Bananes plantain',
+    'Igname',
+    'Manioc',
+    'Haricots',
+  ];
+
   /// Provider schedules (for restaurant p1 - Chez Tantine Marie)
   static const List<ProviderSchedule> restaurantP1Schedules = [
     ProviderSchedule(id: 'sch1', providerId: 'p1', dayOfWeek: 0, openTime: '08:00', closeTime: '22:00'),
