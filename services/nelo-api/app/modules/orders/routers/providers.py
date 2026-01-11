@@ -368,9 +368,9 @@ async def update_provider(
 )
 async def update_provider_status(
     provider_id: UUID,
-    new_status: str = Query(..., pattern="^(pending|active|suspended|closed)$"),
     current_user: Annotated[CurrentUser, Depends(require_role("admin"))],
     provider_service: ProviderServiceDep,
+    new_status: str = Query(..., pattern="^(pending|active|suspended|closed)$"),
 ) -> ProviderResponse:
     """Update provider status (admin only)."""
     provider = await provider_service.update_provider_status(provider_id, new_status)
@@ -390,9 +390,9 @@ async def update_provider_status(
 )
 async def toggle_provider_open(
     provider_id: UUID,
-    is_open: bool = Query(..., description="Etat ouvert ou ferme"),
     current_user: CurrentUser,
     provider_service: ProviderServiceDep,
+    is_open: bool = Query(..., description="Etat ouvert ou ferme"),
 ) -> ProviderResponse:
     """Toggle provider open/closed status."""
     provider = await provider_service.toggle_provider_open(
