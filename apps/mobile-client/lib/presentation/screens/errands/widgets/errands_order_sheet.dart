@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../domain/entities/entities.dart';
 import '../../gas/widgets/address_picker_sheet.dart';
@@ -20,9 +21,12 @@ class ErrandsOrderSheet extends StatelessWidget {
     required this.onVoiceRecordTap,
     required this.onVoiceRecordDelete,
     required this.totalBudget,
+    required this.onBudgetChanged,
     required this.onSubmit,
     required this.isProcessing,
     this.recordingUrl,
+    this.isAutoCalculated = false,
+    this.minimumBudget = 0,
   });
 
   final List<Map<String, dynamic>> addresses;
@@ -38,22 +42,37 @@ class ErrandsOrderSheet extends StatelessWidget {
   final VoidCallback onVoiceRecordTap;
   final VoidCallback onVoiceRecordDelete;
   final int totalBudget;
+  final bool isAutoCalculated;
+  final int minimumBudget;
+  final ValueChanged<int> onBudgetChanged;
   final VoidCallback onSubmit;
   final bool isProcessing;
 
   bool get _canSubmit {
     if (selectedAddress == null) return false;
+
+    final validItems = shoppingItems.where((item) => item.isValid).toList();
+
     // Accept if has valid items OR has a voice recording
-    final hasValidItems = shoppingItems.any((item) => item.isValid);
-    return hasValidItems || hasRecording;
+    if (validItems.isEmpty && !hasRecording) return false;
+
+    // If has items, all must have quantity
+    if (validItems.isNotEmpty) {
+      final allHaveQuantity = validItems.every((item) => item.hasQuantity);
+      if (!allHaveQuantity) return false;
+    }
+
+    // In manual mode, budget must be specified and >= minimum FCFA prices
+    if (!isAutoCalculated) {
+      // If there are FCFA prices, budget must cover them
+      if (minimumBudget > 0 && totalBudget < minimumBudget) return false;
+      // Budget must be specified (> 0) if there are items
+      if (validItems.isNotEmpty && totalBudget <= 0) return false;
+    }
+
+    return true;
   }
 
-  String _formatBudget(int amount) {
-    return amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]} ',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,44 +167,12 @@ class ErrandsOrderSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Budget total display
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet_outlined,
-                            color: AppColors.primary,
-                            size: 24,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            'Budget total',
-                            style: AppTypography.titleSmall.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '${_formatBudget(totalBudget)} FCFA',
-                        style: AppTypography.titleMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+                // Budget total input
+                _BudgetInputField(
+                  value: totalBudget,
+                  isAutoCalculated: isAutoCalculated,
+                  minimumBudget: minimumBudget,
+                  onChanged: onBudgetChanged,
                 ),
 
                 const SizedBox(height: AppSpacing.sm),
@@ -401,6 +388,244 @@ class _AddressSelector extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Budget input field - auto-calculated or manual
+class _BudgetInputField extends StatefulWidget {
+  const _BudgetInputField({
+    required this.value,
+    required this.isAutoCalculated,
+    required this.onChanged,
+    this.minimumBudget = 0,
+  });
+
+  final int value;
+  final bool isAutoCalculated;
+  final int minimumBudget;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_BudgetInputField> createState() => _BudgetInputFieldState();
+}
+
+class _BudgetInputFieldState extends State<_BudgetInputField> {
+  late TextEditingController _controller;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.value > 0 ? widget.value.toString() : '',
+    );
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  @override
+  void didUpdateWidget(_BudgetInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update text if value changed externally and field is not focused
+    if (!_focusNode.hasFocus && widget.value != oldWidget.value) {
+      _controller.text = widget.value > 0 ? widget.value.toString() : '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      // Parse and notify on focus lost
+      final value = int.tryParse(_controller.text) ?? 0;
+      widget.onChanged(value);
+    }
+  }
+
+  void _onSubmitted(String text) {
+    final value = int.tryParse(text) ?? 0;
+    widget.onChanged(value);
+    _focusNode.unfocus();
+  }
+
+  String _formatBudget(int amount) {
+    if (amount <= 0) return '0';
+    return amount.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]} ',
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Budget is too low if:
+    // - Not auto-calculated AND (budget < minimum OR budget is 0 when minimum exists)
+    final isBudgetTooLow = !widget.isAutoCalculated &&
+        (widget.value < widget.minimumBudget ||
+            (widget.minimumBudget > 0 && widget.value <= 0));
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isBudgetTooLow
+            ? AppColors.error.withValues(alpha: 0.05)
+            : AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: isBudgetTooLow
+              ? AppColors.error.withValues(alpha: 0.3)
+              : AppColors.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance_wallet_outlined,
+                color: isBudgetTooLow ? AppColors.error : AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Budget',
+                    style: AppTypography.titleSmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (widget.isAutoCalculated)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 12,
+                          color: AppColors.success,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Calculé auto',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              const Spacer(),
+              // Auto-calculated: read-only display, Manual: editable field
+              if (widget.isAutoCalculated)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    border: Border.all(
+                        color: AppColors.success.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    '${_formatBudget(widget.value)} F',
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.success,
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  width: 120,
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.right,
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isBudgetTooLow ? AppColors.error : AppColors.primary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: AppTypography.titleMedium.copyWith(
+                        color: AppColors.textHint,
+                      ),
+                      suffixText: ' F',
+                      suffixStyle: AppTypography.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isBudgetTooLow ? AppColors.error : AppColors.primary,
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderSide: BorderSide(
+                            color: isBudgetTooLow
+                                ? AppColors.error
+                                : AppColors.grey300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderSide: BorderSide(
+                            color: isBudgetTooLow
+                                ? AppColors.error
+                                : AppColors.grey300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderSide: BorderSide(
+                            color: isBudgetTooLow
+                                ? AppColors.error
+                                : AppColors.primary,
+                            width: 2),
+                      ),
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    onChanged: (text) {
+                      // Update budget in real-time as user types
+                      final value = int.tryParse(text) ?? 0;
+                      widget.onChanged(value);
+                    },
+                    onSubmitted: _onSubmitted,
+                  ),
+                ),
+            ],
+          ),
+          // Show minimum budget hint in manual mode
+          if (!widget.isAutoCalculated && widget.minimumBudget > 0) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Min: ${_formatBudget(widget.minimumBudget)} F (somme des prix)',
+              style: AppTypography.labelSmall.copyWith(
+                color: isBudgetTooLow ? AppColors.error : AppColors.textHint,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

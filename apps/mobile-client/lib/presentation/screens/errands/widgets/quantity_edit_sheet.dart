@@ -22,17 +22,44 @@ class _QuantityEditSheetState extends State<QuantityEditSheet> {
   late TextEditingController _quantityController;
   late String _selectedUnit;
 
+  // Mapping for fraction display and parsing
+  static const Map<String, double> _fractionValues = {
+    '¼ (quart)': 0.25,
+    '½ (demi)': 0.5,
+  };
+
   @override
   void initState() {
     super.initState();
     _quantityController = TextEditingController(
-      text: widget.item.quantity > 0
-          ? (widget.item.quantity == widget.item.quantity.toInt()
-              ? widget.item.quantity.toInt().toString()
-              : widget.item.quantity.toString())
-          : '',
+      text: _formatQuantityForDisplay(widget.item.quantity),
     );
     _selectedUnit = widget.item.unit;
+  }
+
+  /// Format quantity for display (convert decimals to fractions if applicable)
+  String _formatQuantityForDisplay(double quantity) {
+    if (quantity <= 0) return '';
+    // Check if it's a known fraction
+    for (final entry in _fractionValues.entries) {
+      if ((quantity - entry.value).abs() < 0.001) {
+        return entry.key;
+      }
+    }
+    // Otherwise display as number
+    return quantity == quantity.toInt()
+        ? quantity.toInt().toString()
+        : quantity.toString();
+  }
+
+  /// Parse text to quantity (handle fractions)
+  double _parseQuantity(String text) {
+    // Check if it's a fraction
+    if (_fractionValues.containsKey(text)) {
+      return _fractionValues[text]!;
+    }
+    // Try parsing as number
+    return double.tryParse(text.replaceAll(',', '.')) ?? 0;
   }
 
   @override
@@ -42,7 +69,7 @@ class _QuantityEditSheetState extends State<QuantityEditSheet> {
   }
 
   void _onSave() {
-    final quantity = double.tryParse(_quantityController.text) ?? 0;
+    final quantity = _parseQuantity(_quantityController.text);
     final updatedItem = widget.item.copyWith(
       quantity: quantity,
       unit: _selectedUnit,
@@ -58,6 +85,24 @@ class _QuantityEditSheetState extends State<QuantityEditSheet> {
     );
     widget.onSave(updatedItem);
     Navigator.of(context).pop();
+  }
+
+  /// Build a quick value chip that sets both value and unit
+  Widget _buildQuickChip(String label, String inputValue, String unit) {
+    return ActionChip(
+      label: Text(label),
+      labelStyle: AppTypography.labelMedium.copyWith(
+        color: AppColors.primary,
+      ),
+      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+      side: BorderSide.none,
+      onPressed: () {
+        setState(() {
+          _quantityController.text = inputValue;
+          _selectedUnit = unit;
+        });
+      },
+    );
   }
 
   @override
@@ -141,8 +186,9 @@ class _QuantityEditSheetState extends State<QuantityEditSheet> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  // Allow digits, decimals, and fraction characters
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,½¼()a-zA-Zéè\s]')),
                   ],
                   style: AppTypography.titleLarge.copyWith(
                     fontWeight: FontWeight.bold,
@@ -217,34 +263,36 @@ class _QuantityEditSheetState extends State<QuantityEditSheet> {
 
           const SizedBox(height: AppSpacing.lg),
 
-          // Quick value buttons (for FCFA)
-          if (_selectedUnit == ArticleUnit.fcfa) ...[
-            Text(
-              'Valeurs rapides',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          // Quick value buttons - all values shown together
+          Text(
+            'Valeurs rapides',
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Wrap(
-              spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
-              children: [500, 1000, 2000, 5000, 10000].map((value) {
-                return ActionChip(
-                  label: Text('$value F'),
-                  labelStyle: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
-                  ),
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  side: BorderSide.none,
-                  onPressed: () {
-                    _quantityController.text = value.toString();
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              // Fractional values (with unit)
+              _buildQuickChip('¼ (quart)', '¼ (quart)', ArticleUnit.kg),
+              _buildQuickChip('½ (demi)', '½ (demi)', ArticleUnit.kg),
+              // Whole quantity values
+              _buildQuickChip('1', '1', ArticleUnit.unit),
+              _buildQuickChip('2', '2', ArticleUnit.unit),
+              _buildQuickChip('3', '3', ArticleUnit.unit),
+              _buildQuickChip('5', '5', ArticleUnit.unit),
+              // Price values
+              _buildQuickChip('500 F', '500', ArticleUnit.fcfa),
+              _buildQuickChip('1000 F', '1000', ArticleUnit.fcfa),
+              _buildQuickChip('2000 F', '2000', ArticleUnit.fcfa),
+              _buildQuickChip('5000 F', '5000', ArticleUnit.fcfa),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.md),
 
           // Action buttons
           Row(

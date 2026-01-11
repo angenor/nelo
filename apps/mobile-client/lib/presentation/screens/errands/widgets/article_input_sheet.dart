@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../data/mock/mock_data.dart';
 import '../../../../domain/entities/entities.dart';
 
-/// Bottom sheet for adding articles with autocomplete and history
+/// Bottom sheet for adding multiple articles
+/// Simple interface: type name + add, or tap suggestions
 class ArticleInputSheet extends StatefulWidget {
   const ArticleInputSheet({
     super.key,
     required this.recentArticles,
-    required this.onArticleAdded,
+    required this.onArticlesAdded,
     required this.onHistoryCleared,
   });
 
   /// Recent articles from history
   final List<String> recentArticles;
 
-  /// Called when an article is added
-  final void Function(ErrandsItem item) onArticleAdded;
+  /// Called when articles are added (can be multiple)
+  final void Function(List<ErrandsItem> items) onArticlesAdded;
 
   /// Called when history is cleared
   final VoidCallback onHistoryCleared;
@@ -27,89 +27,92 @@ class ArticleInputSheet extends StatefulWidget {
 }
 
 class _ArticleInputSheetState extends State<ArticleInputSheet> {
-  final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _articleController = TextEditingController();
+  final FocusNode _articleFocusNode = FocusNode();
 
-  String _selectedUnit = ArticleUnit.fcfa;
-  List<String> _filteredSuggestions = [];
-  bool _isSearching = false;
+  /// List of articles pending to be added
+  List<ErrandsItem> _pendingArticles = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredSuggestions = MockData.grocerySuggestions;
-    // Auto-focus search field
+    // Auto-focus article field
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFocusNode.requestFocus();
+      _articleFocusNode.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _quantityController.dispose();
-    _searchFocusNode.dispose();
+    _articleController.dispose();
+    _articleFocusNode.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      _isSearching = query.isNotEmpty;
-      if (query.isEmpty) {
-        _filteredSuggestions = MockData.grocerySuggestions;
-      } else {
-        // Filter both suggestions and recent articles
-        final allItems = {
-          ...widget.recentArticles,
-          ...MockData.grocerySuggestions,
-        }.toList(); // Remove duplicates
-
-        _filteredSuggestions = allItems
-            .where((item) =>
-                item.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
-    });
-  }
-
-  void _selectArticle(String name) {
-    _searchController.text = name;
-    setState(() {
-      _isSearching = false;
-    });
-  }
-
-  void _addArticle() {
-    final name = _searchController.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Veuillez entrer un nom d\'article'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+  /// Quick add article from suggestion or history
+  void _quickAddArticle(String name) {
+    // Check if already added
+    if (_pendingArticles.any((item) => item.name == name)) {
       return;
     }
-
-    final quantity = double.tryParse(_quantityController.text) ?? 0;
 
     final item = ErrandsItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
-      quantity: quantity,
-      unit: _selectedUnit,
+      quantity: 0,
+      unit: ArticleUnit.fcfa,
     );
 
-    widget.onArticleAdded(item);
+    setState(() {
+      _pendingArticles = [..._pendingArticles, item];
+    });
+  }
+
+  /// Add article from text input
+  void _addCurrentArticle() {
+    final name = _articleController.text.trim();
+    if (name.isEmpty) {
+      return;
+    }
+
+    final item = ErrandsItem(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      quantity: 0,
+      unit: ArticleUnit.fcfa,
+    );
+
+    setState(() {
+      _pendingArticles = [..._pendingArticles, item];
+      _articleController.clear();
+    });
+
+    // Re-focus for next article
+    _articleFocusNode.requestFocus();
+  }
+
+  void _removePendingArticle(int index) {
+    setState(() {
+      _pendingArticles = [
+        ..._pendingArticles.sublist(0, index),
+        ..._pendingArticles.sublist(index + 1),
+      ];
+    });
+  }
+
+  void _finishAdding() {
+    if (_pendingArticles.isEmpty) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    widget.onArticlesAdded(_pendingArticles);
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
       decoration: const BoxDecoration(
@@ -146,12 +149,31 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Ajouter un article',
+                  'Ajouter des articles',
                   style: AppTypography.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
+                if (_pendingArticles.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                    ),
+                    child: Text(
+                      '${_pendingArticles.length}',
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: AppSpacing.xs),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
@@ -161,57 +183,134 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
             ),
           ),
 
-          // Search field
+          // Article input field with add button
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              onChanged: _onSearchChanged,
-              style: AppTypography.bodyLarge,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                hintText: 'Rechercher un article...',
-                hintStyle: AppTypography.bodyLarge.copyWith(
-                  color: AppColors.textHint,
-                ),
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Icon(
-                    Icons.search,
-                    color: AppColors.primary,
-                    size: 24,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _articleController,
+                    focusNode: _articleFocusNode,
+                    onSubmitted: (_) => _addCurrentArticle(),
+                    style: AppTypography.bodyLarge,
+                    textInputAction: TextInputAction.done,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: 'Nom de l\'article...',
+                      hintStyle: AppTypography.bodyLarge.copyWith(
+                        color: AppColors.textHint,
+                      ),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Icon(
+                          Icons.edit,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: AppColors.grey100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.md,
+                      ),
+                    ),
                   ),
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                        icon: const Icon(Icons.clear),
-                        color: AppColors.textSecondary,
-                      )
-                    : null,
-                filled: true,
-                fillColor: AppColors.grey100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: BorderSide.none,
+                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _addCurrentArticle,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(48, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                    ),
+                    child: const Icon(Icons.add, size: 24),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.md,
-                ),
-              ),
+              ],
             ),
           ),
 
           const SizedBox(height: AppSpacing.md),
+
+          // Pending articles list (if any)
+          if (_pendingArticles.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.shopping_basket,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        'Articles à ajouter',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: List.generate(_pendingArticles.length, (index) {
+                      final item = _pendingArticles[index];
+                      return Chip(
+                        label: Text(item.name),
+                        labelStyle: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                        deleteIcon: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: AppColors.error,
+                        ),
+                        onDeleted: () => _removePendingArticle(index),
+                        backgroundColor: AppColors.surface,
+                        side: BorderSide(color: AppColors.grey300),
+                        padding: EdgeInsets.zero,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+
+          if (_pendingArticles.isNotEmpty) const SizedBox(height: AppSpacing.sm),
 
           // Content area - scrollable
           Flexible(
@@ -221,7 +320,7 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Recent articles section
-                  if (!_isSearching && widget.recentArticles.isNotEmpty) ...[
+                  if (widget.recentArticles.isNotEmpty) ...[
                     Row(
                       children: [
                         Icon(
@@ -256,13 +355,55 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    ...widget.recentArticles.take(5).map((article) =>
-                        _ArticleTile(
-                          name: article,
-                          icon: Icons.history,
-                          onTap: () => _selectArticle(article),
-                        )),
-                    const SizedBox(height: AppSpacing.md),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: widget.recentArticles.take(8).map((article) {
+                        final isAlreadyAdded =
+                            _pendingArticles.any((item) => item.name == article);
+                        return ActionChip(
+                          avatar: Icon(
+                            Icons.history,
+                            size: 16,
+                            color: isAlreadyAdded
+                                ? AppColors.success
+                                : AppColors.textSecondary,
+                          ),
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(article),
+                              if (isAlreadyAdded) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: AppColors.success,
+                                ),
+                              ],
+                            ],
+                          ),
+                          onPressed:
+                              isAlreadyAdded ? null : () => _quickAddArticle(article),
+                          backgroundColor: isAlreadyAdded
+                              ? AppColors.success.withValues(alpha: 0.1)
+                              : AppColors.grey100,
+                          labelStyle: AppTypography.bodySmall.copyWith(
+                            color: isAlreadyAdded
+                                ? AppColors.success
+                                : AppColors.textPrimary,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusFull),
+                          ),
+                          side: isAlreadyAdded
+                              ? BorderSide(color: AppColors.success)
+                              : BorderSide.none,
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
 
                   // Suggestions section
@@ -275,7 +416,7 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
-                        _isSearching ? 'Résultats' : 'Suggestions',
+                        'Suggestions',
                         style: AppTypography.labelMedium.copyWith(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -285,24 +426,45 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                   ),
                   const SizedBox(height: AppSpacing.sm),
 
-                  // Suggestion chips
+                  // Suggestion chips - tappable to add directly
                   Wrap(
                     spacing: AppSpacing.xs,
                     runSpacing: AppSpacing.xs,
-                    children: _filteredSuggestions.take(12).map((suggestion) {
+                    children: MockData.grocerySuggestions.map((suggestion) {
+                      final isAlreadyAdded =
+                          _pendingArticles.any((item) => item.name == suggestion);
                       return ActionChip(
-                        label: Text(suggestion),
-                        onPressed: () => _selectArticle(suggestion),
-                        backgroundColor: AppColors.grey100,
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(suggestion),
+                            if (isAlreadyAdded) ...[
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.check,
+                                size: 14,
+                                color: AppColors.success,
+                              ),
+                            ],
+                          ],
+                        ),
+                        onPressed:
+                            isAlreadyAdded ? null : () => _quickAddArticle(suggestion),
+                        backgroundColor: isAlreadyAdded
+                            ? AppColors.success.withValues(alpha: 0.1)
+                            : AppColors.grey100,
                         labelStyle: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textPrimary,
+                          color: isAlreadyAdded
+                              ? AppColors.success
+                              : AppColors.textPrimary,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusFull,
-                          ),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusFull),
                         ),
-                        side: BorderSide.none,
+                        side: isAlreadyAdded
+                            ? BorderSide(color: AppColors.success)
+                            : BorderSide.none,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
                         ),
@@ -310,108 +472,13 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
                     }).toList(),
                   ),
 
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Quantity/Price section
-                  Text(
-                    'Quantité / Prix (optionnel)',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  Row(
-                    children: [
-                      // Quantity input
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: _quantityController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*\.?\d*'),
-                            ),
-                          ],
-                          style: AppTypography.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: 'Valeur',
-                            hintStyle: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textHint,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.grey100,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMd,
-                              ),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.md,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.sm),
-
-                      // Unit dropdown
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.grey100,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedUnit,
-                              isExpanded: true,
-                              icon: Icon(
-                                Icons.keyboard_arrow_down,
-                                color: AppColors.textSecondary,
-                              ),
-                              style: AppTypography.bodyLarge.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
-                              items: ArticleUnit.all.map((unit) {
-                                return DropdownMenuItem<String>(
-                                  value: unit,
-                                  child: Text(unit),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() {
-                                    _selectedUnit = value;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: AppSpacing.lg + keyboardHeight),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
           ),
 
-          // Add button - fixed at bottom
+          // Bottom button - fixed at bottom
           Container(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.md,
@@ -432,12 +499,23 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _addArticle,
-                icon: const Icon(Icons.check, size: 20),
-                label: const Text('Ajouter à la liste'),
+                onPressed: _finishAdding,
+                icon: Icon(
+                  _pendingArticles.isEmpty ? Icons.close : Icons.check,
+                  size: 20,
+                ),
+                label: Text(
+                  _pendingArticles.isEmpty
+                      ? 'Fermer'
+                      : 'Ajouter ${_pendingArticles.length} article${_pendingArticles.length > 1 ? 's' : ''} à la liste',
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
+                  backgroundColor: _pendingArticles.isEmpty
+                      ? AppColors.grey300
+                      : AppColors.primary,
+                  foregroundColor: _pendingArticles.isEmpty
+                      ? AppColors.textSecondary
+                      : AppColors.white,
                   padding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.md,
                   ),
@@ -449,54 +527,6 @@ class _ArticleInputSheetState extends State<ArticleInputSheet> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Tile for displaying an article in the list
-class _ArticleTile extends StatelessWidget {
-  const _ArticleTile({
-    required this.name,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String name;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-          horizontal: AppSpacing.xs,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                name,
-                style: AppTypography.bodyMedium,
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: AppColors.grey400,
-            ),
-          ],
-        ),
       ),
     );
   }

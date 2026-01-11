@@ -46,7 +46,7 @@ class ErrandsItem extends Equatable {
     return 0;
   }
 
-  /// Format quantity for display (e.g., "3 500 F" or "2 kg")
+  /// Format quantity for display (e.g., "3 500 F" or "2 kg" or "½ kg")
   String get formattedQuantity {
     if (quantity <= 0) return '';
 
@@ -58,10 +58,18 @@ class ErrandsItem extends Equatable {
       return '$formatted F';
     }
 
-    // For other units, format nicely
-    final q = quantity == quantity.toInt()
-        ? quantity.toInt().toString()
-        : quantity.toStringAsFixed(1);
+    // For other units, format nicely with fraction support
+    String q;
+    // Check for common fractions
+    if ((quantity - 0.25).abs() < 0.001) {
+      q = '¼';
+    } else if ((quantity - 0.5).abs() < 0.001) {
+      q = '½';
+    } else if (quantity == quantity.toInt()) {
+      q = quantity.toInt().toString();
+    } else {
+      q = quantity.toStringAsFixed(1);
+    }
     return '$q $unit';
   }
 

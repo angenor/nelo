@@ -29,6 +29,9 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
   // Form processing state
   bool _isProcessing = false;
 
+  // Manual budget (used when mixed units)
+  int _manualBudget = 0;
+
   // Article history
   List<String> _articleHistory = [];
   late final ArticleHistoryDataSource _historyDataSource;
@@ -82,7 +85,7 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
           expand: false,
           builder: (context, scrollController) => ArticleInputSheet(
             recentArticles: _articleHistory,
-            onArticleAdded: _onArticleAdded,
+            onArticlesAdded: _onArticlesAdded,
             onHistoryCleared: _onHistoryCleared,
           ),
         ),
@@ -90,13 +93,15 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
     );
   }
 
-  void _onArticleAdded(ErrandsItem item) {
+  void _onArticlesAdded(List<ErrandsItem> items) {
     setState(() {
-      _shoppingItems = [..._shoppingItems, item];
+      _shoppingItems = [..._shoppingItems, ...items];
     });
 
-    // Add to history
-    _historyDataSource.addToHistory(item.name);
+    // Add all to history
+    for (final item in items) {
+      _historyDataSource.addToHistory(item.name);
+    }
     _loadArticleHistory();
   }
 
@@ -179,8 +184,54 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
     );
   }
 
-  int get _totalBudget {
-    return _shoppingItems.fold(0, (sum, item) => sum + item.estimatedPrice);
+  void _onBudgetChanged(int budget) {
+    setState(() {
+      _manualBudget = budget;
+    });
+  }
+
+  /// Check if all items are in FCFA with quantity (auto-calculable)
+  /// Returns true only if ALL items have quantity specified AND all are in FCFA
+  bool get _isAutoCalculable {
+    final validItems = _shoppingItems.where((item) => item.isValid).toList();
+    if (validItems.isEmpty) return false;
+    // All items must have quantity AND be in FCFA
+    return validItems.every((item) => item.hasQuantity && item.unit == ArticleUnit.fcfa);
+  }
+
+  /// Calculate the total budget from FCFA items
+  int get _calculatedBudget {
+    return _shoppingItems
+        .where((item) => item.unit == ArticleUnit.fcfa && item.hasQuantity)
+        .fold(0, (sum, item) => sum + item.quantity.toInt());
+  }
+
+  /// Get the effective budget (auto or manual)
+  int get _effectiveBudget {
+    if (_isAutoCalculable) {
+      return _calculatedBudget;
+    }
+    return _manualBudget;
+  }
+
+  /// Minimum budget based on FCFA items
+  int get _minimumBudget => _calculatedBudget;
+
+  /// Check if all valid items have quantity specified
+  bool get _allItemsHaveQuantity {
+    final validItems = _shoppingItems.where((item) => item.isValid).toList();
+    if (validItems.isEmpty) return true; // No items = OK (voice only)
+    return validItems.every((item) => item.hasQuantity);
+  }
+
+  /// Check if budget is coherent (>= sum of FCFA prices and > 0 if items exist)
+  bool get _isBudgetCoherent {
+    if (_isAutoCalculable) return true; // Auto = always coherent
+    final validItems = _shoppingItems.where((item) => item.isValid).toList();
+    // If there are items, budget must be > 0
+    if (validItems.isNotEmpty && _manualBudget <= 0) return false;
+    // Budget must cover FCFA prices
+    return _manualBudget >= _minimumBudget;
   }
 
   Future<void> _onSubmit() async {
@@ -209,6 +260,39 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
       return;
     }
 
+    // Validate all items have quantity/price
+    if (validItems.isNotEmpty && !_allItemsHaveQuantity) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'Veuillez préciser la quantité ou le prix de tous les articles'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Validate budget coherence (only in manual mode)
+    if (!_isBudgetCoherent) {
+      String errorMessage;
+      if (_manualBudget <= 0) {
+        errorMessage = 'Veuillez saisir un budget';
+      } else {
+        final formatted = _minimumBudget.toString().replaceAllMapped(
+              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+              (m) => '${m[1]} ',
+            );
+        errorMessage = 'Le budget doit être au moins $formatted F (somme des prix)';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     // Simulate order processing
@@ -224,7 +308,7 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
       barrierDismissible: false,
       builder: (context) => _OrderSuccessDialog(
         itemCount: validItems.length,
-        totalBudget: _totalBudget,
+        totalBudget: _effectiveBudget,
         hasVoiceNote: _voiceRecordingUrl != null,
         onDone: () {
           Navigator.of(context).pop();
@@ -267,7 +351,10 @@ class _ErrandsOrderScreenState extends State<ErrandsOrderScreen> {
         recordingUrl: _voiceRecordingUrl,
         onVoiceRecordTap: _onVoiceRecordTap,
         onVoiceRecordDelete: _onVoiceRecordDelete,
-        totalBudget: _totalBudget,
+        totalBudget: _effectiveBudget,
+        isAutoCalculated: _isAutoCalculable,
+        minimumBudget: _minimumBudget,
+        onBudgetChanged: _onBudgetChanged,
         onSubmit: _onSubmit,
         isProcessing: _isProcessing,
       ),
