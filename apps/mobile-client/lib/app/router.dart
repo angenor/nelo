@@ -7,6 +7,8 @@ import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/gas/gas_order_screen.dart';
 import '../presentation/screens/gas/gas_confirmation_screen.dart';
 import '../presentation/screens/errands/errands_order_screen.dart';
+import '../presentation/screens/parcel/parcel_order_screen.dart';
+import '../presentation/screens/parcel/parcel_confirmation_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/main/main_shell.dart';
 import '../presentation/screens/onboarding/onboarding_screen.dart';
@@ -34,6 +36,7 @@ class AppRoutes {
   static const String gasConfirm = '/gas/confirm';
   static const String errands = '/errands';
   static const String parcel = '/parcel';
+  static const String parcelConfirm = '/parcel/confirm';
 
   static const String providerDetail = '/provider/:id';
   static const String productDetail = '/product/:id';
@@ -273,13 +276,27 @@ class AppRouter {
         path: AppRoutes.parcel,
         name: 'parcel',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            const _ServicePlaceholderScreen(
-              title: 'Envoyer un colis',
-              icon: Icons.local_shipping,
-              color: Color(0xFF007AFF),
-              description: 'Carte multi-points + description colis',
-            ),
+        builder: (context, state) => const ParcelOrderScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.parcelConfirm,
+        name: 'parcelConfirm',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          if (extra == null) {
+            return const _PlaceholderScreen(title: 'Erreur');
+          }
+          return ParcelConfirmationScreen(
+            pickupAddress: extra['pickupAddress'] as Map<String, dynamic>,
+            destinations: extra['destinations'] as List<ParcelDestination>,
+            description: extra['description'] as String,
+            hasVoiceNote: extra['hasVoiceNote'] as bool,
+            recordingDuration: extra['recordingDuration'] as Duration,
+            totalDistanceKm: extra['totalDistanceKm'] as double,
+            estimatedPrice: extra['estimatedPrice'] as int,
+          );
+        },
       ),
     ],
     errorBuilder: (context, state) => _ErrorScreen(error: state.error),

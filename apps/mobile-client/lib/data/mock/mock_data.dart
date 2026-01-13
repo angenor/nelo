@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../../domain/entities/entities.dart';
 
@@ -976,6 +978,99 @@ class MockData {
       'isDefault': false,
     },
   ];
+
+  // ============================================
+  // PARCEL SERVICE PRICING
+  // ============================================
+
+  /// Parcel delivery pricing configuration in FCFA
+  static const Map<String, int> parcelPricing = {
+    'base_fee': 500, // Base delivery fee
+    'per_km_rate': 200, // Price per kilometer
+    'additional_stop_fee': 300, // Fee for each additional destination
+    'min_fee': 1000, // Minimum delivery fee
+    'max_distance_km': 20, // Maximum delivery distance
+  };
+
+  /// Calculate parcel delivery price based on total distance and number of stops
+  static int calculateParcelPrice(double totalDistanceKm, int numberOfStops) {
+    final baseFee = parcelPricing['base_fee']!;
+    final perKmRate = parcelPricing['per_km_rate']!;
+    final additionalStopFee = parcelPricing['additional_stop_fee']!;
+    final minFee = parcelPricing['min_fee']!;
+
+    // Calculate: base + (distance * rate) + (extra stops * stop fee)
+    int price = baseFee + (totalDistanceKm * perKmRate).round();
+    if (numberOfStops > 1) {
+      price += (numberOfStops - 1) * additionalStopFee;
+    }
+
+    return price < minFee ? minFee : price;
+  }
+
+  /// Calculate distance between two points using simplified Haversine
+  /// Returns distance in kilometers
+  static double calculateDistance(
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
+    const double earthRadiusKm = 6371.0;
+
+    final dLat = _degToRad(lat2 - lat1);
+    final dLng = _degToRad(lng2 - lng1);
+
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_degToRad(lat1)) *
+            math.cos(_degToRad(lat2)) *
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
+
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return earthRadiusKm * c;
+  }
+
+  static double _degToRad(double deg) => deg * (3.141592653589793 / 180);
+
+  /// Calculate total route distance from pickup through all destinations
+  static double calculateTotalRouteDistance(
+    Map<String, dynamic> pickup,
+    List<Map<String, dynamic>> destinations,
+  ) {
+    if (destinations.isEmpty) return 0;
+
+    final pickupLat = pickup['latitude'] as double?;
+    final pickupLng = pickup['longitude'] as double?;
+
+    if (pickupLat == null || pickupLng == null) return 0;
+
+    double totalDistance = 0;
+    double prevLat = pickupLat;
+    double prevLng = pickupLng;
+
+    for (final dest in destinations) {
+      final destLat = dest['latitude'] as double?;
+      final destLng = dest['longitude'] as double?;
+      if (destLat != null && destLng != null) {
+        totalDistance += calculateDistance(prevLat, prevLng, destLat, destLng);
+        prevLat = destLat;
+        prevLng = destLng;
+      }
+    }
+
+    return totalDistance;
+  }
+
+  /// Format price for display (e.g., "1 500 FCFA")
+  static String formatPrice(int price) {
+    final formatted = price.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]} ',
+        );
+    return '$formatted FCFA';
+  }
 
   /// Current promotions
   static final List<Promotion> promotions = [
