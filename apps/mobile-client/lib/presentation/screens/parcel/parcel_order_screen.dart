@@ -30,6 +30,9 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
   Duration _recordingDuration = Duration.zero;
   bool _isPlaying = false;
 
+  // Photos
+  List<String> _photos = [];
+
   // Calculated values
   double _totalDistanceKm = 0;
   int _estimatedPrice = 0;
@@ -201,6 +204,14 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
     }
   }
 
+  void _onAddPhotoTap() {
+    // TODO: Implement photo picker (camera or gallery)
+    // For now, simulate adding a photo
+    setState(() {
+      _photos.add('photo_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    });
+  }
+
   void _calculateRoute() {
     if (_pickupAddress == null) {
       setState(() {
@@ -286,6 +297,7 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
       'description': _description,
       'hasVoiceNote': _hasRecording,
       'recordingDuration': _recordingDuration,
+      'photos': _photos,
       'totalDistanceKm': _totalDistanceKm,
       'estimatedPrice': _estimatedPrice,
     });
@@ -388,6 +400,8 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
                 onVoiceRecordDelete: _onVoiceRecordDelete,
                 onVoicePlayTap: _onVoicePlayTap,
                 isPlaying: _isPlaying,
+                onAddPhotoTap: _onAddPhotoTap,
+                photoCount: _photos.length,
                 totalDistanceKm: _totalDistanceKm,
                 estimatedPrice: _estimatedPrice,
                 onSubmit: _onSubmit,

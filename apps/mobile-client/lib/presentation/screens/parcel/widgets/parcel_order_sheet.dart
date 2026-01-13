@@ -31,6 +31,8 @@ class ParcelOrderSheet extends StatelessWidget {
     required this.onVoiceRecordDelete,
     required this.onVoicePlayTap,
     required this.isPlaying,
+    required this.onAddPhotoTap,
+    this.photoCount = 0,
     required this.totalDistanceKm,
     required this.estimatedPrice,
     required this.onSubmit,
@@ -67,6 +69,10 @@ class ParcelOrderSheet extends StatelessWidget {
   final VoidCallback onVoiceRecordDelete;
   final VoidCallback onVoicePlayTap;
   final bool isPlaying;
+
+  // Photos
+  final VoidCallback onAddPhotoTap;
+  final int photoCount;
 
   // Summary
   final double totalDistanceKm;
@@ -175,6 +181,8 @@ class ParcelOrderSheet extends StatelessWidget {
                   onVoiceRecordDelete: onVoiceRecordDelete,
                   onVoicePlayTap: onVoicePlayTap,
                   isPlaying: isPlaying,
+                  onAddPhotoTap: onAddPhotoTap,
+                  photoCount: photoCount,
                 ),
                 const SizedBox(height: AppSpacing.lg),
 

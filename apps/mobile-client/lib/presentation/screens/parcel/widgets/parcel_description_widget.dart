@@ -16,6 +16,8 @@ class ParcelDescriptionWidget extends StatelessWidget {
     required this.onVoiceRecordDelete,
     required this.onVoicePlayTap,
     this.isPlaying = false,
+    required this.onAddPhotoTap,
+    this.photoCount = 0,
   });
 
   /// Text description of the parcel
@@ -44,6 +46,12 @@ class ParcelDescriptionWidget extends StatelessWidget {
 
   /// Whether the recording is playing
   final bool isPlaying;
+
+  /// Called when add photo button is tapped
+  final VoidCallback onAddPhotoTap;
+
+  /// Number of photos added
+  final int photoCount;
 
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -192,6 +200,56 @@ class ParcelDescriptionWidget extends StatelessWidget {
                     ],
 
                     const Spacer(),
+
+                    // Photo button with count badge
+                    GestureDetector(
+                      onTap: onAddPhotoTap,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.xs),
+                        decoration: BoxDecoration(
+                          color: photoCount > 0
+                              ? AppColors.primary.withValues(alpha: 0.1)
+                              : AppColors.grey100,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              photoCount > 0
+                                  ? Icons.photo_library
+                                  : Icons.add_photo_alternate_outlined,
+                              size: 20,
+                              color: photoCount > 0
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
+                            if (photoCount > 0)
+                              Positioned(
+                                right: -6,
+                                top: -6,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    '$photoCount',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: AppSpacing.xs),
 
                     // Mic button (only show when not recording and no recording exists)
                     if (!isRecording && !hasRecording)
