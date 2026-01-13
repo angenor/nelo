@@ -458,42 +458,42 @@ orders.orders: service_type='parcel'
 ### Phase 7: Checkout Unifie + Paiements
 
 #### 7.1 Checkout (commun a tous les services)
-- [ ] Resume commande (adapte au service)
-- [ ] Adresse de livraison
-- [ ] Estimation temps de livraison
-- [ ] Selection mode de paiement:
+- [x] Resume commande (adapte au service)
+- [x] Adresse de livraison
+- [x] Estimation temps de livraison
+- [x] Selection mode de paiement:
   - Portefeuille NELO
   - Mobile Money (Wave, Orange, MTN)
   - Cash a la livraison
-- [ ] Application code promo
-- [ ] Total final
-- [ ] Bouton confirmer
+- [ ] Application code promo (a connecter avec API)
+- [x] Total final
+- [x] Bouton confirmer
 
 #### 7.2 Suivi Commande (commun)
-- [ ] Timeline du statut (`order_status_history`)
-- [ ] Carte avec position livreur (temps reel)
-- [ ] Infos livreur (photo, nom, vehicule)
-- [ ] Boutons appel / message
-- [ ] ETA dynamique
-- [ ] Code de confirmation livraison
+- [x] Timeline du statut (`order_status_history`)
+- [x] Carte avec position livreur (placeholder, temps reel a connecter)
+- [x] Infos livreur (photo, nom, vehicule)
+- [x] Boutons appel / message
+- [x] ETA dynamique
+- [x] Code de confirmation livraison
 
 #### 7.3 Historique Commandes
-- [ ] Liste commandes avec icone service (🍔⛽🛒📦)
-- [ ] Filtres par service, statut, date
-- [ ] Detail commande
-- [ ] Bouton "Commander a nouveau" (si applicable)
+- [x] Liste commandes avec icone service
+- [x] Filtres par service, statut, date
+- [x] Detail commande
+- [x] Bouton "Commander a nouveau" (si applicable)
 
 #### 7.4 Portefeuille
-- [ ] Solde actuel (`payments.wallets.balance`)
-- [ ] Historique transactions (`payments.transactions`)
-- [ ] Bouton recharger
+- [x] Solde actuel (`payments.wallets.balance`)
+- [x] Historique transactions (`payments.transactions`)
+- [x] Bouton recharger
 
 #### 7.5 Recharge Portefeuille
-- [ ] Montants pre-definis (1000, 2000, 5000, 10000)
-- [ ] Montant personnalise
-- [ ] Selection methode (Wave, Orange Money, MTN)
-- [ ] Redirection vers paiement
-- [ ] Confirmation
+- [x] Montants pre-definis (1000, 2000, 5000, 10000)
+- [x] Montant personnalise
+- [x] Selection methode (Wave, Orange Money, MTN)
+- [x] Redirection vers paiement (mock)
+- [x] Confirmation
 
 ---
 

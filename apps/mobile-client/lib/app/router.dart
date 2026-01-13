@@ -7,6 +7,9 @@ import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/gas/gas_order_screen.dart';
 import '../presentation/screens/gas/gas_confirmation_screen.dart';
 import '../presentation/screens/errands/errands_order_screen.dart';
+import '../presentation/screens/orders/orders_screen.dart';
+import '../presentation/screens/orders/order_detail_screen.dart';
+import '../presentation/screens/orders/order_tracking_screen.dart';
 import '../presentation/screens/parcel/parcel_order_screen.dart';
 import '../presentation/screens/parcel/parcel_confirmation_screen.dart';
 import '../presentation/screens/home/home_screen.dart';
@@ -16,6 +19,8 @@ import '../presentation/screens/restaurants/restaurants_screen.dart';
 import '../presentation/screens/restaurants/restaurant_detail/restaurant_detail_screen.dart';
 import '../presentation/screens/search/search_screen.dart';
 import '../presentation/screens/splash/splash_screen.dart';
+import '../presentation/screens/wallet/wallet_screen.dart';
+import '../presentation/screens/wallet/wallet_topup_screen.dart';
 
 /// Route names
 class AppRoutes {
@@ -42,11 +47,13 @@ class AppRoutes {
   static const String productDetail = '/product/:id';
   static const String cart = '/cart';
   static const String checkout = '/checkout';
+  static const String orderDetail = '/order/:id';
   static const String orderTracking = '/order/:id/tracking';
   static const String orders = '/orders';
   static const String profile = '/profile';
   static const String addresses = '/addresses';
   static const String wallet = '/wallet';
+  static const String walletTopUp = '/wallet/topup';
   static const String notifications = '/notifications';
 }
 
@@ -141,8 +148,7 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.orders,
                 name: 'orders',
-                builder: (context, state) =>
-                    const _PlaceholderScreen(title: 'Mes commandes'),
+                builder: (context, state) => const OrdersScreen(),
               ),
             ],
           ),
@@ -152,8 +158,7 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.wallet,
                 name: 'wallet',
-                builder: (context, state) =>
-                    const _PlaceholderScreen(title: 'Portefeuille'),
+                builder: (context, state) => const WalletScreen(),
               ),
             ],
           ),
@@ -204,13 +209,34 @@ class AppRouter {
             const _PlaceholderScreen(title: 'Paiement'),
       ),
       GoRoute(
+        path: AppRoutes.orderDetail,
+        name: 'orderDetail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Order?;
+          if (extra == null) {
+            return const _PlaceholderScreen(title: 'Erreur');
+          }
+          return OrderDetailScreen(order: extra);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.orderTracking,
         name: 'orderTracking',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return _PlaceholderScreen(title: 'Suivi commande: $id');
+          final extra = state.extra as Order?;
+          if (extra == null) {
+            return const _PlaceholderScreen(title: 'Erreur');
+          }
+          return OrderTrackingScreen(order: extra);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.walletTopUp,
+        name: 'walletTopUp',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const WalletTopUpScreen(),
       ),
       GoRoute(
         path: AppRoutes.addresses,

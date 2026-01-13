@@ -1106,4 +1106,301 @@ class MockData {
       endsAt: DateTime.now().add(const Duration(days: 14)),
     ),
   ];
+
+  // ============================================
+  // WALLET & TRANSACTIONS
+  // ============================================
+
+  /// Current user wallet balance (mock)
+  static const int walletBalance = 5000;
+
+  /// Mock wallet transactions
+  static List<Map<String, dynamic>> get walletTransactions => [
+        {
+          'id': 'tx1',
+          'type': 'topUp',
+          'amount': 5000,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(hours: 2)),
+          'description': 'Recharge via Wave',
+          'reference': 'WAV-2024-001234',
+          'paymentMethod': 'wave',
+        },
+        {
+          'id': 'tx2',
+          'type': 'payment',
+          'amount': 3500,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(days: 1)),
+          'description': 'Commande Gaz #ORD-2024-0003',
+          'orderId': 'ord3',
+        },
+        {
+          'id': 'tx3',
+          'type': 'topUp',
+          'amount': 10000,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(days: 2)),
+          'description': 'Recharge via Orange Money',
+          'reference': 'OM-2024-005678',
+          'paymentMethod': 'orangeMoney',
+        },
+        {
+          'id': 'tx4',
+          'type': 'payment',
+          'amount': 2500,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(days: 3)),
+          'description': 'Commande Restaurant #ORD-2024-0002',
+          'orderId': 'ord2',
+        },
+        {
+          'id': 'tx5',
+          'type': 'cashback',
+          'amount': 500,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(days: 3)),
+          'description': 'Cashback première commande',
+        },
+        {
+          'id': 'tx6',
+          'type': 'refund',
+          'amount': 1500,
+          'status': 'completed',
+          'createdAt': DateTime.now().subtract(const Duration(days: 5)),
+          'description': 'Remboursement commande annulée',
+          'orderId': 'ord_cancelled',
+        },
+      ];
+
+  /// Preset top-up amounts in FCFA
+  static const List<int> topUpAmounts = [1000, 2000, 5000, 10000];
+
+  // ============================================
+  // ORDERS
+  // ============================================
+
+  /// Mock orders for order history
+  static List<Map<String, dynamic>> get orders => [
+        // Active order - in transit
+        {
+          'id': 'ord1',
+          'orderNumber': 'ORD-2024-0001',
+          'serviceType': 'restaurant',
+          'status': 'inTransit',
+          'totalAmount': 4500,
+          'deliveryFee': 500,
+          'createdAt': DateTime.now().subtract(const Duration(minutes: 25)),
+          'providerName': 'Chez Tantine Marie',
+          'providerLogoUrl': 'https://i.pravatar.cc/150?u=r1',
+          'deliveryAddress': 'Quartier Résidentiel, Tiassalé',
+          'paymentMethod': 'wallet',
+          'itemsSummary': 'Poulet braisé + Attiéké, Bissap',
+          'itemsCount': 2,
+          'confirmationCode': '4523',
+          'estimatedDeliveryTime': DateTime.now().add(const Duration(minutes: 15)),
+          'driver': {
+            'id': 'drv1',
+            'name': 'Konan Yao',
+            'phone': '+225 07 00 00 01',
+            'photoUrl': 'https://i.pravatar.cc/150?u=driver1',
+            'vehicleType': 'Moto',
+            'vehiclePlate': 'AB 1234 CI',
+            'rating': 4.8,
+            'currentLatitude': 5.8985,
+            'currentLongitude': -4.8228,
+          },
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 25)),
+            },
+            {
+              'status': 'confirmed',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 23)),
+            },
+            {
+              'status': 'preparing',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 20)),
+            },
+            {
+              'status': 'readyForPickup',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 10)),
+            },
+            {
+              'status': 'pickedUp',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 8)),
+            },
+            {
+              'status': 'inTransit',
+              'timestamp': DateTime.now().subtract(const Duration(minutes: 5)),
+            },
+          ],
+        },
+        // Completed order - restaurant
+        {
+          'id': 'ord2',
+          'orderNumber': 'ORD-2024-0002',
+          'serviceType': 'restaurant',
+          'status': 'delivered',
+          'totalAmount': 3000,
+          'deliveryFee': 500,
+          'createdAt': DateTime.now().subtract(const Duration(days: 1, hours: 2)),
+          'providerName': 'Le Maquis du Port',
+          'providerLogoUrl': 'https://i.pravatar.cc/150?u=r2',
+          'deliveryAddress': 'Centre-ville, Tiassalé',
+          'paymentMethod': 'cash',
+          'itemsSummary': 'Poisson braisé + Alloco',
+          'itemsCount': 1,
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+            },
+            {
+              'status': 'confirmed',
+              'timestamp': DateTime.now().subtract(const Duration(days: 1, hours: 2, minutes: 55)),
+            },
+            {
+              'status': 'preparing',
+              'timestamp': DateTime.now().subtract(const Duration(days: 1, hours: 2, minutes: 50)),
+            },
+            {
+              'status': 'delivered',
+              'timestamp': DateTime.now().subtract(const Duration(days: 1, hours: 2)),
+            },
+          ],
+        },
+        // Completed order - gas
+        {
+          'id': 'ord3',
+          'orderNumber': 'ORD-2024-0003',
+          'serviceType': 'gas',
+          'status': 'delivered',
+          'totalAmount': 4000,
+          'deliveryFee': 500,
+          'createdAt': DateTime.now().subtract(const Duration(days: 2)),
+          'providerName': 'Dépôt Gaz Yao',
+          'providerLogoUrl': 'https://i.pravatar.cc/150?u=g1',
+          'deliveryAddress': 'Quartier Résidentiel, Tiassalé',
+          'paymentMethod': 'wallet',
+          'itemsSummary': 'Bouteille 6kg - Échange',
+          'itemsCount': 1,
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(days: 2, hours: 1)),
+            },
+            {
+              'status': 'confirmed',
+              'timestamp': DateTime.now().subtract(const Duration(days: 2, minutes: 55)),
+            },
+            {
+              'status': 'delivered',
+              'timestamp': DateTime.now().subtract(const Duration(days: 2)),
+            },
+          ],
+        },
+        // Completed order - errands
+        {
+          'id': 'ord4',
+          'orderNumber': 'ORD-2024-0004',
+          'serviceType': 'errands',
+          'status': 'delivered',
+          'totalAmount': 8500,
+          'deliveryFee': 1000,
+          'createdAt': DateTime.now().subtract(const Duration(days: 4)),
+          'providerName': 'Service Courses',
+          'deliveryAddress': 'Chez Maman, Route de Divo',
+          'paymentMethod': 'wave',
+          'itemsSummary': 'Riz 5kg, Huile 1L, Tomates, Oignons...',
+          'itemsCount': 6,
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(days: 4, hours: 2)),
+            },
+            {
+              'status': 'confirmed',
+              'timestamp': DateTime.now().subtract(const Duration(days: 4, hours: 1, minutes: 50)),
+            },
+            {
+              'status': 'delivered',
+              'timestamp': DateTime.now().subtract(const Duration(days: 4)),
+            },
+          ],
+        },
+        // Completed order - parcel
+        {
+          'id': 'ord5',
+          'orderNumber': 'ORD-2024-0005',
+          'serviceType': 'parcel',
+          'status': 'delivered',
+          'totalAmount': 1500,
+          'deliveryFee': 0,
+          'createdAt': DateTime.now().subtract(const Duration(days: 5)),
+          'pickupAddress': 'Quartier Commerce, Tiassalé',
+          'deliveryAddress': 'Gare routière, Tiassalé',
+          'paymentMethod': 'cash',
+          'itemsSummary': 'Colis express - 2 destinations',
+          'itemsCount': 1,
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(days: 5, hours: 1)),
+            },
+            {
+              'status': 'confirmed',
+              'timestamp': DateTime.now().subtract(const Duration(days: 5, minutes: 55)),
+            },
+            {
+              'status': 'delivered',
+              'timestamp': DateTime.now().subtract(const Duration(days: 5)),
+            },
+          ],
+        },
+        // Cancelled order
+        {
+          'id': 'ord6',
+          'orderNumber': 'ORD-2024-0006',
+          'serviceType': 'restaurant',
+          'status': 'cancelled',
+          'totalAmount': 2000,
+          'deliveryFee': 500,
+          'createdAt': DateTime.now().subtract(const Duration(days: 6)),
+          'providerName': 'Fast Food Abi',
+          'providerLogoUrl': 'https://i.pravatar.cc/150?u=r3',
+          'deliveryAddress': 'Centre-ville, Tiassalé',
+          'paymentMethod': 'wallet',
+          'itemsSummary': 'Hamburger, Frites',
+          'itemsCount': 2,
+          'statusHistory': [
+            {
+              'status': 'pending',
+              'timestamp': DateTime.now().subtract(const Duration(days: 6, hours: 1)),
+            },
+            {
+              'status': 'cancelled',
+              'timestamp': DateTime.now().subtract(const Duration(days: 6)),
+              'note': 'Annulée par le client',
+            },
+          ],
+        },
+      ];
+
+  /// Get active orders (in progress)
+  static List<Map<String, dynamic>> get activeOrders =>
+      orders.where((o) => _isActiveStatus(o['status'] as String)).toList();
+
+  /// Get completed orders
+  static List<Map<String, dynamic>> get completedOrders =>
+      orders.where((o) => !_isActiveStatus(o['status'] as String)).toList();
+
+  /// Get orders by service type
+  static List<Map<String, dynamic>> getOrdersByService(String serviceType) =>
+      orders.where((o) => o['serviceType'] == serviceType).toList();
+
+  static bool _isActiveStatus(String status) {
+    return status != 'delivered' && status != 'cancelled' && status != 'refunded';
+  }
 }
