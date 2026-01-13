@@ -66,7 +66,7 @@ class ParcelDescriptionWidget extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              'Description du colis',
+              'Description du colis (optionnel)',
               style: AppTypography.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -75,151 +75,144 @@ class ParcelDescriptionWidget extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Description text field
+        // Description text field with mic button
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(color: AppColors.grey300),
           ),
-          child: TextField(
-            onChanged: onDescriptionChanged,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Ex: Enveloppe, petit carton, documents...',
-              hintStyle: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textHint,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(AppSpacing.md),
-            ),
-            style: AppTypography.bodyMedium,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // Voice note section
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.grey100,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          ),
           child: Column(
             children: [
-              // Label
-              Row(
-                children: [
-                  const Icon(
-                    Icons.mic,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    'Ou enregistrez une note vocale',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-
-              // Recording controls
-              if (hasRecording && !isRecording) ...[
-                // Playback controls
-                Row(
-                  children: [
-                    // Play button
-                    IconButton(
-                      onPressed: onVoicePlayTap,
-                      icon: Icon(
-                        isPlaying ? Icons.pause_circle : Icons.play_circle,
-                        size: 40,
-                        color: AppColors.primary,
-                      ),
-                    ),
-
-                    // Duration
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Note vocale',
-                            style: AppTypography.labelMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            _formatDuration(recordingDuration),
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Delete button
-                    IconButton(
-                      onPressed: onVoiceRecordDelete,
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: AppColors.error,
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                // Record button
-                GestureDetector(
-                  onTap: onVoiceRecordTap,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isRecording ? AppColors.error : AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                      border: Border.all(
-                        color: isRecording ? AppColors.error : AppColors.grey300,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isRecording ? Icons.stop : Icons.mic,
-                          size: 20,
-                          color: isRecording ? AppColors.white : AppColors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          isRecording
-                              ? 'Arrêter (${_formatDuration(recordingDuration)})'
-                              : 'Appuyer pour enregistrer',
-                          style: AppTypography.labelMedium.copyWith(
-                            color: isRecording ? AppColors.white : AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Max duration hint
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Maximum 2 minutes',
-                  style: AppTypography.labelSmall.copyWith(
+              TextField(
+                onChanged: onDescriptionChanged,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  hintText: 'Ex: Enveloppe, petit carton...',
+                  hintStyle: AppTypography.bodyMedium.copyWith(
                     color: AppColors.textHint,
                   ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                  ),
                 ),
-              ],
+                style: AppTypography.bodyMedium,
+              ),
+
+              // Bottom row with mic button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  0,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    // Voice recording indicator or button
+                    if (hasRecording && !isRecording) ...[
+                      // Compact playback controls
+                      GestureDetector(
+                        onTap: onVoicePlayTap,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isPlaying ? Icons.pause : Icons.play_arrow,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatDuration(recordingDuration),
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      GestureDetector(
+                        onTap: onVoiceRecordDelete,
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ] else if (isRecording) ...[
+                      // Recording indicator
+                      GestureDetector(
+                        onTap: onVoiceRecordTap,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.stop,
+                                size: 14,
+                                color: AppColors.white,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatDuration(recordingDuration),
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    const Spacer(),
+
+                    // Mic button (only show when not recording and no recording exists)
+                    if (!isRecording && !hasRecording)
+                      GestureDetector(
+                        onTap: onVoiceRecordTap,
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.xs),
+                          decoration: BoxDecoration(
+                            color: AppColors.grey100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.mic_none,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
