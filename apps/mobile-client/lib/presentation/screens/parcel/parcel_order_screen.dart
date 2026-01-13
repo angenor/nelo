@@ -109,8 +109,20 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
   }
 
   void _onAddDestination(Map<String, dynamic> address) {
-    if (_destinations.length < 5) {
-      setState(() {
+    setState(() {
+      // Check if first destination is empty - fill it instead of adding new
+      final firstEmptyIndex = _destinations.indexWhere((d) => !d.isValid);
+
+      if (firstEmptyIndex != -1) {
+        // Fill the first empty destination
+        _destinations[firstEmptyIndex] = _destinations[firstEmptyIndex].copyWith(
+          address: address['address'] as String?,
+          latitude: address['latitude'] as double?,
+          longitude: address['longitude'] as double?,
+          label: address['label'] as String?,
+        );
+      } else if (_destinations.length < 5) {
+        // All destinations are filled, add a new one
         _destinations.add(ParcelDestination(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           address: address['address'] as String?,
@@ -118,9 +130,9 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
           longitude: address['longitude'] as double?,
           label: address['label'] as String?,
         ));
-      });
-      _calculateRoute();
-    }
+      }
+    });
+    _calculateRoute();
   }
 
   void _onDescriptionChanged(String value) {
