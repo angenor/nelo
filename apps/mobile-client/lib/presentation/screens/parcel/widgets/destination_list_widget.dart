@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../domain/entities/parcel_destination.dart';
+import '../../gas/widgets/address_picker_sheet.dart';
 import 'destination_input_tile.dart';
 
 /// Widget showing a list of delivery destinations with add/remove functionality
@@ -10,7 +11,8 @@ class DestinationListWidget extends StatelessWidget {
   const DestinationListWidget({
     super.key,
     required this.destinations,
-    required this.onDestinationTap,
+    required this.savedAddresses,
+    required this.onDestinationChanged,
     required this.onDestinationDelete,
     required this.onAddDestination,
     this.maxDestinations = 5,
@@ -19,8 +21,11 @@ class DestinationListWidget extends StatelessWidget {
   /// List of destinations
   final List<ParcelDestination> destinations;
 
-  /// Called when a destination tile is tapped
-  final void Function(int index) onDestinationTap;
+  /// List of saved addresses for picker
+  final List<Map<String, dynamic>> savedAddresses;
+
+  /// Called when a destination address is changed
+  final void Function(int index, Map<String, dynamic> address) onDestinationChanged;
 
   /// Called when a destination should be deleted
   final void Function(int index) onDestinationDelete;
@@ -30,6 +35,32 @@ class DestinationListWidget extends StatelessWidget {
 
   /// Maximum number of destinations allowed
   final int maxDestinations;
+
+  void _openAddressPicker(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (ctx, scrollController) => AddressPickerSheet(
+            savedAddresses: savedAddresses,
+            onAddressSelected: (selectedAddress) {
+              // AddressPickerSheet already pops itself
+              onDestinationChanged(index, selectedAddress);
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +94,7 @@ class DestinationListWidget extends StatelessWidget {
           (index) => DestinationInputTile(
             index: index,
             destination: destinations[index],
-            onTap: () => onDestinationTap(index),
+            onTap: () => _openAddressPicker(context, index),
             onDelete: () => onDestinationDelete(index),
             canDelete: destinations.length > 1,
           ),

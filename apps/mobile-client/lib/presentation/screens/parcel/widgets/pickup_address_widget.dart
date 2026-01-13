@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../gas/widgets/address_picker_sheet.dart';
 
 /// Widget for selecting the pickup address
 class PickupAddressWidget extends StatelessWidget {
   const PickupAddressWidget({
     super.key,
     required this.address,
+    required this.savedAddresses,
     required this.onAddressChanged,
     required this.onUseMyLocation,
     this.isLoadingLocation = false,
@@ -15,6 +17,9 @@ class PickupAddressWidget extends StatelessWidget {
 
   /// Current pickup address (null if not selected)
   final Map<String, dynamic>? address;
+
+  /// List of saved addresses for picker
+  final List<Map<String, dynamic>> savedAddresses;
 
   /// Called when address is selected/changed
   final ValueChanged<Map<String, dynamic>> onAddressChanged;
@@ -24,6 +29,32 @@ class PickupAddressWidget extends StatelessWidget {
 
   /// Whether location is being fetched
   final bool isLoadingLocation;
+
+  void _openAddressPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) => AddressPickerSheet(
+            savedAddresses: savedAddresses,
+            onAddressSelected: (selectedAddress) {
+              // AddressPickerSheet already pops itself
+              onAddressChanged(selectedAddress);
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +109,7 @@ class PickupAddressWidget extends StatelessWidget {
             children: [
               // Address row
               InkWell(
-                onTap: () {
-                  // TODO: Open address picker sheet
-                },
+                onTap: () => _openAddressPicker(context),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(AppSpacing.radiusMd),
                 ),

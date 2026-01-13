@@ -87,22 +87,16 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
     _calculateRoute();
   }
 
-  void _onDestinationTap(int index) {
-    // For now, simulate selecting an address
-    // In full implementation, this would open an address picker
-    final addresses = MockData.userAddresses;
-    if (addresses.isNotEmpty) {
-      final addr = addresses[index % addresses.length];
-      setState(() {
-        _destinations[index] = _destinations[index].copyWith(
-          address: addr['address'] as String?,
-          latitude: addr['latitude'] as double?,
-          longitude: addr['longitude'] as double?,
-          label: addr['label'] as String?,
-        );
-      });
-      _calculateRoute();
-    }
+  void _onDestinationChanged(int index, Map<String, dynamic> address) {
+    setState(() {
+      _destinations[index] = _destinations[index].copyWith(
+        address: address['address'] as String?,
+        latitude: address['latitude'] as double?,
+        longitude: address['longitude'] as double?,
+        label: address['label'] as String?,
+      );
+    });
+    _calculateRoute();
   }
 
   void _onDestinationDelete(int index) {
@@ -362,12 +356,13 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
             builder: (context, scrollController) {
               return ParcelOrderSheet(
                 scrollController: scrollController,
+                savedAddresses: MockData.userAddresses,
                 pickupAddress: _pickupAddress,
                 onPickupAddressChanged: _onPickupAddressChanged,
                 onUseMyLocation: _onUseMyLocation,
                 isLoadingLocation: _isLoadingLocation,
                 destinations: _destinations,
-                onDestinationTap: _onDestinationTap,
+                onDestinationChanged: _onDestinationChanged,
                 onDestinationDelete: _onDestinationDelete,
                 onAddDestination: _onAddDestination,
                 description: _description,

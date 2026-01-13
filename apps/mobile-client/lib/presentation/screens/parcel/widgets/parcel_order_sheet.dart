@@ -13,12 +13,13 @@ class ParcelOrderSheet extends StatelessWidget {
   const ParcelOrderSheet({
     super.key,
     required this.scrollController,
+    required this.savedAddresses,
     required this.pickupAddress,
     required this.onPickupAddressChanged,
     required this.onUseMyLocation,
     required this.isLoadingLocation,
     required this.destinations,
-    required this.onDestinationTap,
+    required this.onDestinationChanged,
     required this.onDestinationDelete,
     required this.onAddDestination,
     required this.description,
@@ -39,6 +40,9 @@ class ParcelOrderSheet extends StatelessWidget {
 
   final ScrollController scrollController;
 
+  // Saved addresses for picker
+  final List<Map<String, dynamic>> savedAddresses;
+
   // Pickup
   final Map<String, dynamic>? pickupAddress;
   final ValueChanged<Map<String, dynamic>> onPickupAddressChanged;
@@ -47,7 +51,7 @@ class ParcelOrderSheet extends StatelessWidget {
 
   // Destinations
   final List<ParcelDestination> destinations;
-  final void Function(int index) onDestinationTap;
+  final void Function(int index, Map<String, dynamic> address) onDestinationChanged;
   final void Function(int index) onDestinationDelete;
   final VoidCallback onAddDestination;
 
@@ -143,6 +147,7 @@ class ParcelOrderSheet extends StatelessWidget {
                 // Pickup address section
                 PickupAddressWidget(
                   address: pickupAddress,
+                  savedAddresses: savedAddresses,
                   onAddressChanged: onPickupAddressChanged,
                   onUseMyLocation: onUseMyLocation,
                   isLoadingLocation: isLoadingLocation,
@@ -152,7 +157,8 @@ class ParcelOrderSheet extends StatelessWidget {
                 // Destinations section
                 DestinationListWidget(
                   destinations: destinations,
-                  onDestinationTap: onDestinationTap,
+                  savedAddresses: savedAddresses,
+                  onDestinationChanged: onDestinationChanged,
                   onDestinationDelete: onDestinationDelete,
                   onAddDestination: onAddDestination,
                 ),

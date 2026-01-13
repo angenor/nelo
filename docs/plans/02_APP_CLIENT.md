@@ -428,15 +428,15 @@ orders.orders: service_type='errands', special_instructions (JSON avec liste)
 ```
 
 **Fonctionnalites:**
-- [ ] Carte avec tracé du parcours (polyline)
-- [ ] Champ adresse de recuperation
-- [ ] Bouton "Utiliser ma position"
-- [ ] Liste destinations (ajout/suppression dynamique)
-- [ ] Mise a jour carte en temps reel
-- [ ] Description colis (texte)
-- [ ] Note vocale alternative
-- [ ] Calcul distance et prix automatique
-- [ ] Bouton commander
+- [x] Carte avec tracé du parcours (polyline)
+- [x] Champ adresse de recuperation
+- [x] Bouton "Utiliser ma position"
+- [x] Liste destinations (ajout/suppression dynamique)
+- [x] Mise a jour carte en temps reel
+- [x] Description colis (texte)
+- [x] Note vocale alternative
+- [x] Calcul distance et prix automatique
+- [x] Bouton commander
 
 **Stockage commande:**
 ```sql
@@ -446,12 +446,12 @@ orders.orders: service_type='parcel'
 ```
 
 #### 6.2 Confirmation Colis
-- [ ] Carte avec trajet complet
-- [ ] Points A → B1 → B2...
-- [ ] Description / ecoute note vocale
-- [ ] Prix total
-- [ ] Mode de paiement
-- [ ] Bouton confirmer
+- [x] Carte avec trajet complet
+- [x] Points A → B1 → B2...
+- [x] Description / ecoute note vocale
+- [x] Prix total
+- [x] Mode de paiement
+- [x] Bouton confirmer
 
 ---
 
