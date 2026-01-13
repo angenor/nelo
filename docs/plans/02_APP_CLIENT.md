@@ -338,14 +338,14 @@ orders.providers: type='gas_depot', location, is_open
 ```
 
 **Fonctionnalites:**
-- [ ] Carte avec adresse de livraison
-- [ ] Selection adresse (dropdown ou recherche)
-- [ ] Zone de texte pour liste de courses
-- [ ] Ajout article un par un (simple)
-- [ ] Enregistrement note vocale (audio_url)
-- [ ] Champ optionnel discret : lieu des courses
-- [ ] Champ budget estime
-- [ ] Bouton envoyer
+- [x] Carte avec adresse de livraison
+- [x] Selection adresse (dropdown ou recherche)
+- [x] Zone de texte pour liste de courses
+- [x] Ajout article un par un (simple)
+- [x] Enregistrement note vocale (audio_url)
+- [x] Champ optionnel discret : lieu des courses
+- [x] Champ budget estime
+- [x] Bouton envoyer
 
 **Stockage commande:**
 ```sql
@@ -354,11 +354,11 @@ orders.orders: service_type='errands', special_instructions (JSON avec liste)
 ```
 
 #### 5.2 Confirmation Courses
-- [ ] Resume liste / lecture note vocale
-- [ ] Adresse livraison
-- [ ] Budget estime
-- [ ] Mode de paiement (souvent cash a la livraison)
-- [ ] Note: le coursier appellera pour confirmer les prix
+- [x] Resume liste / lecture note vocale
+- [x] Adresse livraison
+- [x] Budget estime
+- [x] Mode de paiement (souvent cash a la livraison)
+- [x] Note: le coursier appellera pour confirmer les prix
 
 ---
 
