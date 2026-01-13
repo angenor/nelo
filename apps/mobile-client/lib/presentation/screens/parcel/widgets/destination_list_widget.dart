@@ -30,8 +30,8 @@ class DestinationListWidget extends StatelessWidget {
   /// Called when a destination should be deleted
   final void Function(int index) onDestinationDelete;
 
-  /// Called when "Add destination" is pressed
-  final VoidCallback onAddDestination;
+  /// Called when a new destination is added with an address
+  final void Function(Map<String, dynamic> address) onAddDestination;
 
   /// Maximum number of destinations allowed
   final int maxDestinations;
@@ -55,6 +55,32 @@ class DestinationListWidget extends StatelessWidget {
             onAddressSelected: (selectedAddress) {
               // AddressPickerSheet already pops itself
               onDestinationChanged(index, selectedAddress);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openAddressPickerForNewDestination(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (ctx, scrollController) => AddressPickerSheet(
+            savedAddresses: savedAddresses,
+            onAddressSelected: (selectedAddress) {
+              // AddressPickerSheet already pops itself
+              onAddDestination(selectedAddress);
             },
           ),
         ),
@@ -104,7 +130,7 @@ class DestinationListWidget extends StatelessWidget {
         if (canAddMore) ...[
           const SizedBox(height: AppSpacing.xs),
           InkWell(
-            onTap: onAddDestination,
+            onTap: () => _openAddressPickerForNewDestination(context),
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             child: Container(
               padding: const EdgeInsets.symmetric(

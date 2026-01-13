@@ -53,7 +53,7 @@ class ParcelOrderSheet extends StatelessWidget {
   final List<ParcelDestination> destinations;
   final void Function(int index, Map<String, dynamic> address) onDestinationChanged;
   final void Function(int index) onDestinationDelete;
-  final VoidCallback onAddDestination;
+  final void Function(Map<String, dynamic> address) onAddDestination;
 
   // Description
   final String description;

@@ -108,11 +108,18 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
     }
   }
 
-  void _onAddDestination() {
+  void _onAddDestination(Map<String, dynamic> address) {
     if (_destinations.length < 5) {
       setState(() {
-        _destinations.add(ParcelDestination.empty());
+        _destinations.add(ParcelDestination(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          address: address['address'] as String?,
+          latitude: address['latitude'] as double?,
+          longitude: address['longitude'] as double?,
+          label: address['label'] as String?,
+        ));
       });
+      _calculateRoute();
     }
   }
 
@@ -229,10 +236,7 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
     final hasValidDestination = _destinations.any((d) => d.isValid);
     if (!hasValidDestination) return false;
 
-    // Either description OR voice note required
-    final hasDescription = _description.trim().isNotEmpty;
-    if (!hasDescription && !_hasRecording) return false;
-
+    // Description is optional - driver can call for details
     return true;
   }
 
@@ -243,8 +247,6 @@ class _ParcelOrderScreenState extends State<ParcelOrderScreen> {
         message = 'Veuillez sélectionner un point de récupération';
       } else if (!_destinations.any((d) => d.isValid)) {
         message = 'Veuillez ajouter au moins une destination';
-      } else if (_description.trim().isEmpty && !_hasRecording) {
-        message = 'Veuillez décrire le colis ou enregistrer une note vocale';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
